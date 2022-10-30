@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: MIT
 
+// 1. Pragma
 pragma solidity ^0.8.7;
+// 2. Imports
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "hardhat/console.sol";
 import "./PriceConverter.sol";
+
+// 3. Interfaces, Libraries, Contracts
 
 /* Errors */
 error Flowmi__TransferFailed();
@@ -13,6 +17,12 @@ error Flowmi__SendMoreToEnterFlowmi();
 error Flowmi__FlowmiRaffleNotOpen();
 error Flowmi__MustBeRegisteredFlowmi();
 error Flowmi__CantFlowmiFollowYourself();
+
+/**@title Flowmi contract
+ * @author Daniel Beltrán
+ * @notice This contract is for raffling funds on flowmi, a pay-to-follow dapp
+ * @dev This implements price feeds as our library
+ */
 
 contract FlowMi is VRFConsumerBaseV2 {
     // Type Declarations
@@ -27,15 +37,9 @@ contract FlowMi is VRFConsumerBaseV2 {
     event RequestSent(uint256 requestId, uint32 numWords);
     event RequestFulfilled(uint256 requestId, uint256[] randomWords);
 
-    struct RequestStatus {
-        bool fulfilled; // whether the request has been successfully fulfilled
-        bool exists; // whether a requestId exists
-        uint256[] randomWords;
-    }
-    mapping(uint256 => RequestStatus) public s_requests; /* requestId --> requestStatus */
-    // past requests Id.
-    uint256[] public requestIds;
-    uint256 public lastRequestId;
+    // State Variables
+
+    // VRF Variables
 
     // DataFeed
     AggregatorV3Interface private i_priceFeed;
@@ -48,26 +52,33 @@ contract FlowMi is VRFConsumerBaseV2 {
     uint64 private immutable i_subscriptionId;
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
     uint32 private constant NUM_WORDS = 1;
-    uint256 private abroRequest = 0;
-    uint256 private abroFulfill = 0;
+
+    struct RequestStatus {
+        bool fulfilled; // whether the request has been successfully fulfilled
+        bool exists; // whether a requestId exists
+        uint256[] randomWords;
+    }
+    mapping(uint256 => RequestStatus) public s_requests; /* requestId --> requestStatus */
+    // past requests Id.
+    uint256[] public requestIds;
+    uint256 public lastRequestId;
 
     // Lottery Variables
     uint256 private immutable i_goal = 3;
-    uint256 private immutable i_entranceFee = 1 * 10**17;
+    uint256 private immutable i_flowmiCost = 1 * 10**17;
     uint256 private immutable prize;
     uint256 private s_index = 0;
     uint256 private s_indexOfWinner;
-    address payable follower;
     address payable profileid;
     address payable s_recentWinner;
     address payable i_flowmiOwner;
 
     mapping(address => mapping(uint256 => address payable))
-        private s_profileToFollowers; //profile to index to follower address
-    mapping(address => uint256) private s_profileToFollowersCount; //mapeo para saber cuántos followers tiene un profileid
-    mapping(address => uint256) private s_profileToFunds; //mapeo cuántos fondos tiene asociado este profile
-    mapping(address => bool) private s_profileIsFlowmi; //mapeo si un profile se registró como flowmi
-    mapping(address => uint256) private s_profileToWins; //mapeo cuántas veces ha ganado el perfil
+        private s_profileToFollowers; // mapping of profile to index to follower address
+    mapping(address => uint256) private s_profileToFollowersCount; // mapping to know the amount of followers an account has
+    mapping(address => uint256) private s_profileToFunds; // mapping to know how much funds has an account gathered
+    mapping(address => bool) private s_profileIsFlowmi; // mapping to know if an account is registered as flowmi
+    mapping(address => uint256) private s_profileToWins; // mapping to know how many times an account has won a raffle
 
     constructor(
         address priceFeed,
@@ -78,16 +89,12 @@ contract FlowMi is VRFConsumerBaseV2 {
     ) VRFConsumerBaseV2(vrfCoordinatorV2) {
         i_priceFeed = AggregatorV3Interface(priceFeed);
         i_flowmiOwner = payable(msg.sender);
-        //s_flowmiState = FlowmiState.OPEN;
-        prize = i_goal * i_entranceFee;
-        // Raffleo
+        prize = i_goal * i_flowmiCost;
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
         s_raffleState = RaffleState.OPEN;
         i_subscriptionId = subscriptionId;
         i_gasLane = gasLane;
         i_callbackGasLimit = callbackGasLimit;
-        abroRequest = 0;
-        abroFulfill = 0;
         s_indexOfWinner = 0;
     }
 
@@ -96,6 +103,12 @@ contract FlowMi is VRFConsumerBaseV2 {
         _;
     }
 
+    /** @notice Gets the amount that an address has funded
+     * Funds our contract based on the MATIC/USD price
+     * Any account can call this function to flowmi follow a registered flowmi account
+     *  @param _profileid is the address of the registered account
+     *   Iniciates the request for a random word to the VRF
+     */
     function flowmiFollow(address _profileid) public payable {
         profileid = payable(_profileid);
 
@@ -109,7 +122,7 @@ contract FlowMi is VRFConsumerBaseV2 {
         }
 
         // Check the entrance fee is correct with Pricefeed for USD/Matic
-        if (msg.value.getConversionRate(i_priceFeed) < i_entranceFee) {
+        if (msg.value.getConversionRate(i_priceFeed) < i_flowmiCost) {
             revert Flowmi__SendMoreToEnterFlowmi();
         }
         // Reads previous amount of flowmiFollower
@@ -131,6 +144,7 @@ contract FlowMi is VRFConsumerBaseV2 {
         }
     }
 
+    // Internal VRF function to request a random word
     // Assumes the subscription is funded sufficiently.
     function requestRandomWords() internal returns (uint256 requestId) {
         // Will revert if subscription is not set and funded.
@@ -152,6 +166,9 @@ contract FlowMi is VRFConsumerBaseV2 {
         return requestId;
     }
 
+    // Internal VRF function, receives the random word
+    // Here we make the payment
+
     function fulfillRandomWords(
         uint256 _requestId,
         uint256[] memory _randomWords
@@ -171,6 +188,7 @@ contract FlowMi is VRFConsumerBaseV2 {
         pay(s_recentWinner);
     }
 
+    // Internal VRF function
     function getRequestStatus(uint256 _requestId)
         external
         view
@@ -185,6 +203,9 @@ contract FlowMi is VRFConsumerBaseV2 {
         return obtengoWinner;
     }
 
+    /** @notice This function transfers, just to make it more difficult to hack
+     *  @param _winner is the address given by the mapping of followers in the index given by the VRF
+     */
     function pay(address _winner) private {
         (bool success, ) = _winner.call{value: prize}("");
         if (!success) {
@@ -192,37 +213,62 @@ contract FlowMi is VRFConsumerBaseV2 {
         }
     }
 
+    /** @notice This function registers a profile
+     */
     function registerProfile() public {
-        s_profileIsFlowmi[msg.sender] = true; //mapping de perfiles [address] = true;
+        s_profileIsFlowmi[msg.sender] = true;
     }
 
+    /** @notice Let's you know if a profile is a flowmi registered profile
+     *  @param _profileid is the address of the profile
+     */
     function isRegisteredProfile(address _profileid)
         public
         view
         returns (bool)
     {
-        return s_profileIsFlowmi[_profileid]; //mapping de perfiles [address] = true;
+        return s_profileIsFlowmi[_profileid];
     }
 
+    /** @notice Unregisters a profile making the mapping value false
+     */
     function unregisterProfile() public {
-        s_profileIsFlowmi[msg.sender] = false; //mapping de perfiles [address] = true;
+        s_profileIsFlowmi[msg.sender] = false;
     }
 
+    /** @notice Let's you know how much is in aave protocol
+     */
     function getPool() public onlyOwner {
         //mapping de progiles [address] = true;
     }
 
+    /** @notice Retrieve the goal of followers when the raffle is activated
+     * @return i_goal uint containing the goal
+     */
     function getGoal() public pure returns (uint256) {
         return i_goal;
     }
+
+    /** @notice Get a 1 if the contract is deployed
+     * @return 1
+     */
 
     function getFlowmiState() public pure returns (uint256) {
         return 1;
     }
 
-    function getEntranceFee() public pure returns (uint256) {
-        return i_entranceFee;
+    /** @notice Get the flowmi follow cost
+     * @return i_flowmiCost cost in dollars
+     */
+
+    function getFlowmiCost() public pure returns (uint256) {
+        return i_flowmiCost;
     }
+
+    /** @notice Gets the number of followers a profile has
+     * @param _profileid is the profile
+     * @return s_profileToFollowersCount of the profile
+     */
 
     function getNumberOffollowers(address _profileid)
         public
@@ -232,6 +278,11 @@ contract FlowMi is VRFConsumerBaseV2 {
         return s_profileToFollowersCount[_profileid];
     }
 
+    /** @notice Gets the address of a follower by index of flowmi follow
+     * @param _profileid is the profile requested
+     * @param _index is the index given to the follower when started flowmi following
+     * @return s_profileToFollowersCount in the profileid location
+     */
     function getFollowerOfIndex(address _profileid, uint256 _index)
         public
         view
@@ -240,6 +291,11 @@ contract FlowMi is VRFConsumerBaseV2 {
         return s_profileToFollowers[_profileid][_index];
     }
 
+    /** @notice Gets funds a profile has to give in the next raffle
+     * @param _profileid is the profile requested
+     * @return s_profileToFunds[_profileid] % i_goal, total amount of funds related to the profile
+     * "modulo" the goal of the raffle, so it only counts what haven't been raffled yet
+     */
     function getFundsToRaffle(address _profileid)
         public
         view
@@ -247,6 +303,11 @@ contract FlowMi is VRFConsumerBaseV2 {
     {
         return s_profileToFunds[_profileid] % i_goal;
     }
+
+    /** @notice Gets total funds a profile has been given
+     * @param _profileid is the profile requested
+     * @return s_profileToFunds[_profileid], total amount of funds related to the profile
+     */
 
     function getTotalFundedProfile(address _profileid)
         public
@@ -256,22 +317,35 @@ contract FlowMi is VRFConsumerBaseV2 {
         return s_profileToFunds[_profileid];
     }
 
-    function getLastWinner() public view returns (address) {
+    /** @notice Gets the latest winner address
+     * @return s_recentWinner address of the last winner
+     */
+    function getLastWinnerAddress() public view returns (address) {
         return s_recentWinner;
     }
 
-    function getWinnerIndex() public view returns (uint256) {
+    /** @notice Gets the latest winner index
+     * @return s_indexOfWinner index of the last winner
+     */
+    function getLastWinnerIndex() public view returns (uint256) {
         return s_indexOfWinner;
     }
 
+    /** @notice Gets the balance in the flowmi account
+     * @return balance
+     */
     function getBalance() public view returns (uint256) {
         return address(this).balance;
     }
 
-    receive() external payable {
-        // can be empty
-    }
+    /** @notice To be able to pay and fallback
+     */
+    receive() external payable {}
 
+    fallback() external payable {}
+
+    /** @notice To witdraw the total amount of funds flowmi account has to the deployer
+     */
     function withdraw() public onlyOwner {
         (bool success, ) = i_flowmiOwner.call{value: address(this).balance}("");
         require(success);

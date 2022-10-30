@@ -52,9 +52,9 @@ const { BigNumber } = require("ethers");
 
       describe("constructor", function () {
         //si debería permitir ejecuciones paralelas mmmmm, siempre OPEN?
-        it("reads the priceFee", async () => {
+        it("reads the flowmi cost", async () => {
           let transaction = (
-            await flowmiContract.connect(deployer).getEntranceFee()
+            await flowmiContract.connect(deployer).getFlowmiCost()
           ).toString();
 
           assert.equal(
@@ -344,7 +344,7 @@ const { BigNumber } = require("ethers");
 
           // Compruebo que tengo un index ganador real desde flowmi
           transaction = (
-            await flowmiContract.connect(deployer).getWinnerIndex()
+            await flowmiContract.connect(deployer).getLastWinnerIndex()
           ).toString();
           assert(transaction != null);
           console.log("Index del ganador según flowmi: ", transaction);
@@ -379,7 +379,7 @@ const { BigNumber } = require("ethers");
 
           // Compruebo que ese index winner corresponde a un address del profileid
           transaction = (
-            await flowmiContract.connect(deployer).getLastWinner()
+            await flowmiContract.connect(deployer).getLastWinnerAddress()
           ).toString();
           console.log("Address del último ganador", transaction);
 
