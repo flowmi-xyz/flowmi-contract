@@ -19,7 +19,7 @@
 - [Thank you!](#thank-you)
 
 
-# Getting Started
+# Getting Started # Flowmi
 
 ## Requirements
 
@@ -113,7 +113,6 @@ Go back to [vrf.chain.link](https://vrf.chain.link) and under your subscription 
 
 6. Flowmi!
 
-```
 
 ### Estimate gas cost in USD
 
