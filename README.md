@@ -1,4 +1,4 @@
-# Flowmi Smartcontract
+# Flowmi SmartContract
 
 *This repo has been updated to work with Mumbai - Polygon.*
 
