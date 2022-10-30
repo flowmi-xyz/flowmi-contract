@@ -129,32 +129,7 @@ If you deploy to a testnet or mainnet, you can verify it if you get an [API Key]
 
 In it's current state, if you have your api key set, it will auto verify goerli contracts!
 
-However, you can manual verify with:
 
-```
-yarn hardhat verify --constructor-args arguments.js DEPLOYED_CONTRACT_ADDRESS
-```
-
-### Typescript differences
-1. `.js` files are now `.ts`
-2. We added a bunch of typescript and typing packages to our `package.json`. They can be installed with:
-   1. `yarn add @typechain/ethers-v5 @typechain/hardhat @types/chai @types/node ts-node typechain typescript`
-3. The biggest one being [typechain](https://github.com/dethcrypto/TypeChain)
-   1. This gives your contracts static typing, meaning you'll always know exactly what functions a contract can call. 
-   2. This gives us `factories` that are specific to the contracts they are factories of. See the tests folder for a version of how this is implemented. 
-4. We use `imports` instead of `require`. Confusing to you? [Watch this video](https://www.youtube.com/watch?v=mK54Cn4ceac)
-5. Add `tsconfig.json`
-
-# Linting
-
-To check linting / code formatting:
-```
-yarn lint
-```
-or, to fix: 
-```
-yarn lint:fix
-```
 
 # Thank you!
 
