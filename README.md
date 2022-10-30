@@ -30,6 +30,9 @@
 
 ## Quickstart
 
+-[polygonscan](https://mumbai.polygonscan.com/address/0x6cbA63391849C41FD84c20D08417de07426fE679#writeContract)
+  - Visit the live testnet contract
+
 ```
 git clone git@github.com:flowmi-xyz/flowmi-contract.git
 cd flowmi
