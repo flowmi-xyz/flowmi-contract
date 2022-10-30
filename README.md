@@ -2,8 +2,6 @@
 
 *This repo has been updated to work with Mumbai - Polygon.*
 
-
-- [Flowmi SmartContract](#flowmi)
 - [Getting Started](#getting-started)
   - [Requirements](#requirements)
   - [Quickstart](#quickstart)
@@ -18,8 +16,6 @@
 
 
 # Getting Started
-# Flowmi SmartContract
-
 ## Requirements
 
 - [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
