@@ -30,7 +30,7 @@
 
 ## Quickstart
 
--[polygonscan](https://mumbai.polygonscan.com/address/0x6cbA63391849C41FD84c20D08417de07426fE679#writeContract)
+- [polygonscan](https://mumbai.polygonscan.com/address/0x6cbA63391849C41FD84c20D08417de07426fE679#writeContract)
   - Visit the live testnet contract
 
 ```
