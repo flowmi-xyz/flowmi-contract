@@ -14,12 +14,10 @@
 - [Deployment to a testnet or mainnet](#deployment-to-a-testnet-or-mainnet)
     - [Estimate gas cost in USD](#estimate-gas-cost-in-usd)
   - [Verify on etherscan](#verify-on-etherscan)
-    - [Typescript differences](#typescript-differences)
-- [Linting](#linting)
 - [Thank you!](#thank-you)
 
 
-# Getting Started # Flowmi
+# Getting Started
 
 ## Requirements
 
