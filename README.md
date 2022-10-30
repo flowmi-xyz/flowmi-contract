@@ -148,7 +148,7 @@ Funds to-raffle (amount of funds able to be raffled)
         return s_profileToFunds[_profileid] % i_goal;
     }
 ```
-Flowmi Follow: a user calls this function with the address of the profile id to follow 
+Flowmi Follow: a user calls this function with the address of the profile id to follow. If the goal is reached, a raffle is summoned. 
 
 ```
 function flowmiFollow(address _profileid) public payable {
