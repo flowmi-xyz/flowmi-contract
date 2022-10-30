@@ -118,6 +118,46 @@ Go back to [vrf.chain.link](https://vrf.chain.link) and under your subscription 
 6. Flowmi!
 
 
+Funds in each user:
+```
+function getTotalFundedProfile(address _profileid)
+        public
+        view
+        returns (uint256)
+    {
+        return s_profileToFunds[_profileid];
+    }
+```
+Number of Flowmi Followers of account:
+```
+    function getNumberOffollowers(address _profileid)
+        public
+        view
+        returns (uint256)
+    {
+        return s_profileToFollowersCount[_profileid];
+    }
+```
+Funds to-raffle (amount of funds able to be raffled)
+```
+ function getFundsToRaffle(address _profileid)
+        public
+        view
+        returns (uint256)
+    {
+        return s_profileToFunds[_profileid] % i_goal;
+    }
+```
+Flowmi Follow: a user calls this function with the address of the profile id to follow 
+
+```
+function flowmiFollow(address _profileid) public payable {
+...
+}
+```
+
+
+
 ### Estimate gas cost in USD
 
 To get a USD estimation of gas cost, you'll need a `COINMARKETCAP_API_KEY` environment variable. You can get one for free from [CoinMarketCap](https://pro.coinmarketcap.com/signup). 
