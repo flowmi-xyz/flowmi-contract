@@ -12,7 +12,7 @@
 - [Deployment to a testnet or mainnet](#deployment-to-a-testnet-or-mainnet)
     - [Estimate gas cost in USD](#estimate-gas-cost-in-usd)
   - [Verify on etherscan](#verify-on-etherscan)
-- [Testing live Mumbai Testnet](#texting-mumbai)
+- [Testing live Mumbai Testnet](#testing-mumbai)
 - [Thank you!](#thank-you)
 
 
@@ -136,7 +136,9 @@ function getTotalFundedProfile(address _profileid)
         return s_profileToFunds[_profileid];
     }
 ```
+
 **Number of Flowmi Followers of account:**
+
     /** @notice Gets the number of followers a profile has
      * @param _profileid is the profile
      * @return s_profileToFollowersCount of the profile
@@ -150,7 +152,9 @@ function getTotalFundedProfile(address _profileid)
         return s_profileToFollowersCount[_profileid];
     }
 ```
+
 **Funds to-raffle (amount of funds able to be raffled):**
+
     /** @notice Gets funds a profile has to give in the next raffle
      * @param _profileid is the profile requested
      * @return s_profileToFunds[_profileid] % i_goal, total amount of funds related to the profile
@@ -165,7 +169,9 @@ function getTotalFundedProfile(address _profileid)
         return s_profileToFunds[_profileid] % i_goal;
     }
 ```
+
 **Flowmi Follow: ** a user calls this function with the address of the profile id to follow. If the goal is reached, a raffle is summoned. 
+
     /** @notice Gets the amount that an address has funded
      * Funds our contract based on the MATIC/USD price
      * Any account can call this function to flowmi follow a registered flowmi account
