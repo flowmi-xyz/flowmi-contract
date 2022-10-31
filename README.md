@@ -118,7 +118,11 @@ Go back to [vrf.chain.link](https://vrf.chain.link) and under your subscription 
 6. Flowmi!
 
 
-Funds in each user:
+Funds in each user.
+    /** @notice Gets total funds a profile has been given
+     * @param _profileid is the profile requested
+     * @return s_profileToFunds[_profileid], total amount of funds related to the profile
+     */
 ```
 function getTotalFundedProfile(address _profileid)
         public
@@ -128,7 +132,11 @@ function getTotalFundedProfile(address _profileid)
         return s_profileToFunds[_profileid];
     }
 ```
-Number of Flowmi Followers of account:
+Number of Flowmi Followers of account.
+    /** @notice Gets the number of followers a profile has
+     * @param _profileid is the profile
+     * @return s_profileToFollowersCount of the profile
+     */
 ```
     function getNumberOffollowers(address _profileid)
         public
@@ -138,7 +146,12 @@ Number of Flowmi Followers of account:
         return s_profileToFollowersCount[_profileid];
     }
 ```
-Funds to-raffle (amount of funds able to be raffled)
+Funds to-raffle (amount of funds able to be raffled).
+    /** @notice Gets funds a profile has to give in the next raffle
+     * @param _profileid is the profile requested
+     * @return s_profileToFunds[_profileid] % i_goal, total amount of funds related to the profile
+     * "modulo" the goal of the raffle, so it only counts what's haven't been raffled yet
+     */
 ```
  function getFundsToRaffle(address _profileid)
         public
@@ -149,6 +162,12 @@ Funds to-raffle (amount of funds able to be raffled)
     }
 ```
 Flowmi Follow: a user calls this function with the address of the profile id to follow. If the goal is reached, a raffle is summoned. 
+    /** @notice Gets the amount that an address has funded
+     * Funds our contract based on the MATIC/USD price
+     * Any account can call this function to flowmi follow a registered flowmi account
+     *  @param _profileid is the address of the registered account
+     *   Iniciates the request for a random word to the VRF
+     */
 
 ```
 function flowmiFollow(address _profileid) public payable {
