@@ -12,6 +12,7 @@
 - [Deployment to a testnet or mainnet](#deployment-to-a-testnet-or-mainnet)
     - [Estimate gas cost in USD](#estimate-gas-cost-in-usd)
   - [Verify on etherscan](#verify-on-etherscan)
+- [Testing live Mumbai Testnet](#texting-mumbai)
 - [Thank you!](#thank-you)
 
 
@@ -115,7 +116,9 @@ And copy / remember the contract address.
 Go back to [vrf.chain.link](https://vrf.chain.link) and under your subscription add `Add consumer` and add your contract address. You should also fund the contract with a minimum of 1 LINK. 
 
 
-6. Flowmi!
+# Testing live Mumbai Testnet
+- [polygonscan](https://mumbai.polygonscan.com/address/0x6cbA63391849C41FD84c20D08417de07426fE679#writeContract)
+  - Visit the live testnet contract
 
 
 Funds in each user.
