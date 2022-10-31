@@ -116,7 +116,7 @@ And copy / remember the contract address.
 Go back to [vrf.chain.link](https://vrf.chain.link) and under your subscription add `Add consumer` and add your contract address. You should also fund the contract with a minimum of 1 LINK. 
 
 
-# Testing live Mumbai Testnet
+# Testing live Mumbai Testnet (#testing-mumbai)
 - [polygonscan](https://mumbai.polygonscan.com/address/0x6cbA63391849C41FD84c20D08417de07426fE679#writeContract)
   - Visit the live testnet contract
 
@@ -170,7 +170,7 @@ function getTotalFundedProfile(address _profileid)
     }
 ```
 
-**Flowmi Follow: ** a user calls this function with the address of the profile id to follow. If the goal is reached, a raffle is summoned. 
+**Flowmi Follow:** a user calls this function with the address of the profile id to follow. If the goal is reached, a raffle is summoned. 
 
     /** @notice Gets the amount that an address has funded
      * Funds our contract based on the MATIC/USD price
