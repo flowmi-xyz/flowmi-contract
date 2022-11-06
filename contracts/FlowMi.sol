@@ -212,7 +212,7 @@ contract FlowMi is VRFConsumerBaseV2 {
         s_profileToFollowersCount[profileid] = s_index;
 
         /* If in goal, withdraw to money from the liquidity pool,
-         * then withdraw calls RandomWords wich's when the randomword is provided, it withdraws
+         * then withdraw calls RandomWords and when the randomword is provided, it withdraws
          * and then flowmi can give the prize
          */
 
@@ -224,11 +224,11 @@ contract FlowMi is VRFConsumerBaseV2 {
             // Permite a la Gateway llevarse los atokens
 
             iaWmatic.approve(address(iWETHGateway), fraction * (i_goal - 1)); // aprueba aMatic tmb,
-            iaWmatic.approve(address(this), fraction * (i_goal - 1)); // aprueba aMatic tmb,
+            /*iaWmatic.approve(address(this), fraction * (i_goal - 1)); // aprueba aMatic tmb,
             iWmatic.approve(address(this), fraction * (i_goal - 1)); // aprueba aMatic tmb,
             iWmatic.approve(address(POOL), fraction * (i_goal - 1)); // aprueba aMatic tmb,
             imatic.approve(address(this), fraction * (i_goal - 1)); // aprueba aMatic tmb,
-            imatic.approve(address(POOL), fraction * (i_goal - 1)); // aprueba aMatic tmb,
+            imatic.approve(address(POOL), fraction * (i_goal - 1)); // aprueba aMatic tmb,*/
             // Recupera de la Pool
             iWETHGateway.withdrawETH(
                 address(POOL),
