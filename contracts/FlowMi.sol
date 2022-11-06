@@ -3,20 +3,37 @@
 // 1. Pragma
 pragma solidity ^0.8.7;
 // 2. Imports
+// 2.1 VRF randomness creator
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+// 2.2 Datafeed
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "hardhat/console.sol";
 import "./PriceConverter.sol";
+// 2.3 Liquidity
+import {IPool} from "@aave/core-v3/contracts/interfaces/IPool.sol";
+import {IERC20} from "@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol";
+import {IAToken} from "@aave/core-v3/contracts/interfaces/IAToken.sol";
+import {IPoolAddressesProvider} from "@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol";
+//import {IWeth} from "./interfaces/IWeth.sol";
+//import {IWeth} from "@aave/core-v3/contracts/misc/interfaces/IWETH.sol";
+import {IWETHGateway} from "@aave/periphery-v3/contracts/misc/interfaces/IWETHGateway.sol";
 
 // 3. Interfaces, Libraries, Contracts
 
 /* Errors */
+// Flowmi Logic Errors
 error Flowmi__TransferFailed();
 error Flowmi__SendMoreToEnterFlowmi();
 error Flowmi__FlowmiRaffleNotOpen();
 error Flowmi__MustBeRegisteredFlowmi();
 error Flowmi__CantFlowmiFollowYourself();
+// Liquidity Errors
+error Error__NotEnoughBalance(uint256 balance, uint256 depositAmount);
+error Error__NotEnoughAllowance(uint256 allowance, uint256 depositAmount);
+error Error__NotEnoughLP(uint256 lpAmount);
+error Error__AmountIsZero();
+error Error__InvalidToken(address token);
 
 /**@title Flowmi contract
  * @author Daniel Beltrán
@@ -37,33 +54,62 @@ contract FlowMi is VRFConsumerBaseV2 {
     event RequestSent(uint256 requestId, uint32 numWords);
     event RequestFulfilled(uint256 requestId, uint256[] randomWords);
 
-    // State Variables
-
-    // VRF Variables
-
     // DataFeed
     AggregatorV3Interface private i_priceFeed;
 
     // VRF Coordinator
     VRFCoordinatorV2Interface private i_vrfCoordinator;
-    uint256 public obtengoWinner;
     bytes32 private immutable i_gasLane; // 500 gwei Key Hash;
     uint32 private immutable i_callbackGasLimit;
     uint64 private immutable i_subscriptionId;
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
     uint32 private constant NUM_WORDS = 1;
 
+    // VRF Requests
     struct RequestStatus {
         bool fulfilled; // whether the request has been successfully fulfilled
         bool exists; // whether a requestId exists
         uint256[] randomWords;
     }
-    mapping(uint256 => RequestStatus) public s_requests; /* requestId --> requestStatus */
+    mapping(uint256 => RequestStatus) private s_requests; /* requestId --> requestStatus */
     // past requests Id.
-    uint256[] public requestIds;
-    uint256 public lastRequestId;
+    uint256[] private requestIds;
+    uint256 private lastRequestId;
 
-    // Lottery Variables
+    // Liquidity Provider
+    IPoolAddressesProvider private immutable i_poolAddressesProvider;
+    IPool private immutable POOL;
+    uint16 private constant AAVE_REF_CODE = 0;
+    uint256 private immutable poolFraction = 95;
+    // Sondas Aaave
+    uint256 private indeposit;
+    uint256 private inwithdraw;
+
+    // Direcciones de matic
+    address private maticTokenAddress =
+        // 0x0000000000000000000000000000000000001010;
+        0xD65d229951E94a7138F47Bd9e0Faff42A7aCe0c6; // token in mumbai testnet
+    address private wmaticTokenAddress =
+        // 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270; // wrapped mainnet
+        0xb685400156cF3CBE8725958DeAA61436727A30c3; // wrapped testnet
+    address private awmaticTokenAddress =
+        //0x6d80113e533a2C0fe82EaBD35f1875DcEA89Ea97;
+        0x89a6AE840b3F8f489418933A220315eeA36d11fF; // atoken testnet
+
+    IERC20 private imatic;
+    IERC20 public iWmatic;
+    IERC20 public iaWmatic;
+
+    // Direcciones de la WETHGateway
+
+    address private WETHGatewayAddress =
+        0x2a58E9bbb5434FdA7FF78051a4B82cb0EF669C17; // testnet
+    IWETHGateway private iWETHGateway;
+
+    event Deposit(address indexed userAddr, uint256 amount);
+    event Withdraw(address indexed userAddr, uint256 amount);
+
+    // Flowmi Lottery Variables
     uint256 private immutable i_goal = 3;
     uint256 private immutable i_flowmiCost = 1 * 10**17;
     uint256 private immutable prize;
@@ -72,6 +118,8 @@ contract FlowMi is VRFConsumerBaseV2 {
     address payable profileid;
     address payable s_recentWinner;
     address payable i_flowmiOwner;
+    uint256 private immutable fraction;
+    uint256 private _withdrawAmmount;
 
     mapping(address => mapping(uint256 => address payable))
         private s_profileToFollowers; // mapping of profile to index to follower address
@@ -79,13 +127,17 @@ contract FlowMi is VRFConsumerBaseV2 {
     mapping(address => uint256) private s_profileToFunds; // mapping to know how much funds has an account gathered
     mapping(address => bool) private s_profileIsFlowmi; // mapping to know if an account is registered as flowmi
     mapping(address => uint256) private s_profileToWins; // mapping to know how many times an account has won a raffle
+    mapping(address => uint256) private s_profileToRaffles; // mapping to know how many times an account has activated a raffle
+
+    // funcion: para contar cuantos
 
     constructor(
         address priceFeed,
         address vrfCoordinatorV2,
         uint64 subscriptionId,
         bytes32 gasLane, // keyHash
-        uint32 callbackGasLimit
+        uint32 callbackGasLimit,
+        address poolAddressesProvider
     ) VRFConsumerBaseV2(vrfCoordinatorV2) {
         i_priceFeed = AggregatorV3Interface(priceFeed);
         i_flowmiOwner = payable(msg.sender);
@@ -96,10 +148,32 @@ contract FlowMi is VRFConsumerBaseV2 {
         i_gasLane = gasLane;
         i_callbackGasLimit = callbackGasLimit;
         s_indexOfWinner = 0;
+        //Pool
+        i_poolAddressesProvider = IPoolAddressesProvider(poolAddressesProvider);
+        POOL = IPool(i_poolAddressesProvider.getPool());
+        // IWeths
+        imatic = IERC20(maticTokenAddress);
+        iWmatic = IERC20(wmaticTokenAddress);
+        iaWmatic = IERC20(awmaticTokenAddress);
+        fraction = (i_flowmiCost * poolFraction) / 100;
+        _withdrawAmmount = fraction * (i_goal - 1);
+
+        indeposit = 0;
+        inwithdraw = 0;
+        // IWETHGateway
+        iWETHGateway = IWETHGateway(WETHGatewayAddress);
     }
 
     modifier onlyOwner() {
         require(msg.sender == i_flowmiOwner, "Must be owner");
+        _;
+    }
+
+    // modifier that checks amount in liquidity pool is not zero
+    modifier checkAmount(uint256 amount) {
+        if (amount == 0) {
+            revert Error__AmountIsZero();
+        }
         _;
     }
 
@@ -112,10 +186,11 @@ contract FlowMi is VRFConsumerBaseV2 {
     function flowmiFollow(address _profileid) public payable {
         profileid = payable(_profileid);
 
-        // Check if profile to flowmiFollow is registered
+        // comment for faster testing in testnet
+        /* Check if profile to flowmiFollow is registered
         if (!s_profileIsFlowmi[_profileid]) {
             revert Flowmi__MustBeRegisteredFlowmi();
-        }
+        }*/
         // Check that you are not following yourself
         if (msg.sender == _profileid) {
             revert Flowmi__CantFlowmiFollowYourself();
@@ -128,24 +203,71 @@ contract FlowMi is VRFConsumerBaseV2 {
         // Reads previous amount of flowmiFollower
         s_index = s_profileToFollowersCount[profileid];
         // Update total amount of funds for profile
-        s_profileToFunds[profileid] += msg.value;
+        //s_profileToFunds[profileid] += msg.value;
+        s_profileToFunds[profileid] += 1;
         // Stores address as follower of profile
         s_profileToFollowers[profileid][s_index] = payable(msg.sender);
         s_index++;
         // Updates amount of flowmiFollowers
         s_profileToFollowersCount[profileid] = s_index;
 
-        // If in goal, select a winner and call payment
+        /* If in goal, withdraw to money from the liquidity pool,
+         * then withdraw calls RandomWords wich's when the randomword is provided, it withdraws
+         * and then flowmi can give the prize
+         */
 
         if (
             s_index % i_goal == 0 && s_profileToFollowersCount[profileid] != 0
         ) {
+            s_profileToRaffles[profileid]++;
+
+            // Permite a la Gateway llevarse los atokens
+
+            iaWmatic.approve(address(iWETHGateway), fraction * (i_goal - 1)); // aprueba aMatic tmb,
+            iaWmatic.approve(address(this), fraction * (i_goal - 1)); // aprueba aMatic tmb,
+            iWmatic.approve(address(this), fraction * (i_goal - 1)); // aprueba aMatic tmb,
+            iWmatic.approve(address(POOL), fraction * (i_goal - 1)); // aprueba aMatic tmb,
+            imatic.approve(address(this), fraction * (i_goal - 1)); // aprueba aMatic tmb,
+            imatic.approve(address(POOL), fraction * (i_goal - 1)); // aprueba aMatic tmb,
+            // Recupera de la Pool
+            iWETHGateway.withdrawETH(
+                address(POOL),
+                _withdrawAmmount,
+                address(this)
+            );
+
+            // Raffle
             requestRandomWords();
+        } else {
+            // Wrapea y deposita directamente a la pool
+            iWETHGateway.depositETH{value: fraction}(
+                address(POOL),
+                address(this),
+                0
+            );
         }
     }
 
-    // Internal VRF function to request a random word
-    // Assumes the subscription is funded sufficiently.
+    // Liquidity Provider
+
+    function getUserAccountData(address _userAddress)
+        external
+        view
+        returns (
+            uint256 totalCollateralBase,
+            uint256 totalDebtBase,
+            uint256 availableBorrowsBase,
+            uint256 currentLiquidationThreshold,
+            uint256 ltv,
+            uint256 healthFactor
+        )
+    {
+        return POOL.getUserAccountData(_userAddress);
+    }
+
+    /* Internal VRF function to request a random word
+     * Assumes the subscription is funded sufficiently.
+     */
     function requestRandomWords() internal returns (uint256 requestId) {
         // Will revert if subscription is not set and funded.
         requestId = i_vrfCoordinator.requestRandomWords(
@@ -167,7 +289,7 @@ contract FlowMi is VRFConsumerBaseV2 {
     }
 
     // Internal VRF function, receives the random word
-    // Here we make the payment
+    // Here we call the payment
 
     function fulfillRandomWords(
         uint256 _requestId,
@@ -185,10 +307,12 @@ contract FlowMi is VRFConsumerBaseV2 {
             1;
 
         s_recentWinner = (s_profileToFollowers[profileid][s_indexOfWinner]);
-        pay(s_recentWinner);
+        s_profileToWins[s_recentWinner]++;
+
+        pay(s_recentWinner, prize);
     }
 
-    // Internal VRF function
+    // Internal VRF function, MAY REMOVE
     function getRequestStatus(uint256 _requestId)
         external
         view
@@ -199,15 +323,11 @@ contract FlowMi is VRFConsumerBaseV2 {
         return (request.fulfilled, request.randomWords);
     }
 
-    function getWin() public view returns (uint256) {
-        return obtengoWinner;
-    }
-
     /** @notice This function transfers, just to make it more difficult to hack
      *  @param _winner is the address given by the mapping of followers in the index given by the VRF
      */
-    function pay(address _winner) private {
-        (bool success, ) = _winner.call{value: prize}("");
+    function pay(address _winner, uint256 _amount) private {
+        (bool success, ) = _winner.call{value: _amount}("");
         if (!success) {
             revert Flowmi__TransferFailed();
         }
@@ -317,6 +437,32 @@ contract FlowMi is VRFConsumerBaseV2 {
         return s_profileToFunds[_profileid];
     }
 
+    /** @notice Gets total wins a profile has
+     * @param _profileid is the profile requested
+     * @return s_profileToWins[_profileid], total amount of raffles won
+     */
+
+    function getProfileToWins(address _profileid)
+        public
+        view
+        returns (uint256)
+    {
+        return s_profileToWins[_profileid];
+    }
+
+    /** @notice Gets total raffles a profile has made
+     * @param _profileid is the profile requested
+     * @return s_profileToRaffles[_profileid], total amount of raffles delivered
+     */
+
+    function getProfileToRaffles(address _profileid)
+        public
+        view
+        returns (uint256)
+    {
+        return s_profileToRaffles[_profileid];
+    }
+
     /** @notice Gets the latest winner address
      * @return s_recentWinner address of the last winner
      */
@@ -338,6 +484,14 @@ contract FlowMi is VRFConsumerBaseV2 {
         return address(this).balance;
     }
 
+    function getWBalance() public view returns (uint256) {
+        return iWmatic.balanceOf(i_flowmiOwner);
+    }
+
+    function getAWBalance() public view returns (uint256) {
+        return iaWmatic.balanceOf(i_flowmiOwner);
+    }
+
     /** @notice To be able to pay and fallback
      */
     receive() external payable {}
@@ -346,8 +500,15 @@ contract FlowMi is VRFConsumerBaseV2 {
 
     /** @notice To witdraw the total amount of funds flowmi account has to the deployer
      */
-    function withdraw() public onlyOwner {
+    function withdrawFunds() public onlyOwner {
         (bool success, ) = i_flowmiOwner.call{value: address(this).balance}("");
         require(success);
+    }
+
+    // deswrpaear el wmatic que devuelve esta función
+    function withdrawPoolToFlowmi() public onlyOwner {
+        iaWmatic.approve(address(iWETHGateway), type(uint).max); // aprueba aMatic tmb,
+
+        iWETHGateway.withdrawETH(address(POOL), type(uint).max, address(this));
     }
 }

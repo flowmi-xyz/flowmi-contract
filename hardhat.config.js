@@ -15,6 +15,7 @@ const POLYGON_MAINNET_RPC_URL =
   "https://polygon-mainnet.alchemyapi.io/v2/your-api-key";
 const MUMBAI_RPC_URL = process.env.MUMBAI_RPC_URL || "XX";
 const PRIVATE_KEY = process.env.PRIVATE_KEY || "0x";
+const MAINNET_RPC_URL = process.env.MAINNET_RPC_URL;
 
 // Your API key for Etherscan, obtain one at https://etherscan.io/
 const ETHERSCAN_API_KEY =
@@ -43,10 +44,9 @@ module.exports = {
   defaultNetwork: "hardhat",
   networks: {
     hardhat: {
-      // // If you want to do some forking, uncomment this
-      // forking: {
-      //   url: MAINNET_RPC_URL
-      // }
+      forking: {
+        url: MAINNET_RPC_URL,
+      },
       chainId: 31337,
     },
     localhost: {
@@ -95,12 +95,15 @@ module.exports = {
   },
   solidity: {
     compilers: [
+      { version: "0.8.10" },
       { version: "0.8.8" },
       { version: "0.8.0" },
       { version: "0.8.7" },
       { version: "0.7.0" },
+      { version: "0.6.12" },
       { version: "0.6.6" },
       { version: "0.6.0" },
+      { version: "0.4.19" },
     ],
   },
   mocha: {

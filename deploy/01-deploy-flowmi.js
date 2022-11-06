@@ -17,6 +17,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   let vrfCoordinatorV2Address,
     subscriptionId,
     vrfCoordinatorV2Mock,
+    aavePoolMainnet,
     maticUsdPriceFeedAddress;
 
   if (chainId == 31337) {
@@ -33,10 +34,12 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     // create Datafeed subscription
     const maticUsdAggregator = await deployments.get("MockV3Aggregator");
     maticUsdPriceFeedAddress = maticUsdAggregator.address;
+    aavePoolMainnet = networkConfig[chainId]["aave"];
   } else {
     vrfCoordinatorV2Address = networkConfig[chainId]["vrfCoordinatorV2"];
     subscriptionId = networkConfig[chainId]["subscriptionId"];
     maticUsdPriceFeedAddress = networkConfig[chainId]["maticUsdPriceFeed"];
+    aavePoolMainnet = networkConfig[chainId]["aave"];
   }
   const waitBlockConfirmations = developmentChains.includes(network.name)
     ? 1
@@ -50,6 +53,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     subscriptionId,
     networkConfig[chainId]["gasLane"],
     networkConfig[chainId]["callbackGasLimit"],
+    aavePoolMainnet,
   ];
   const flowMi = await deploy("FlowMi", {
     from: deployer,
