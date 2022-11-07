@@ -13,6 +13,12 @@ async function main() {
     //  networkConfig[network.config.chainId].wethToken
   );
 
+  const iWMatic = await ethers.getContractAt(
+    "IWETH",
+    wmaticTokenAddress, //WMATIC mainnet polygon
+    deployer
+    //  networkConfig[network.config.chainId].wethToken
+  );
   const iWmatic = await ethers.getContractAt(
     "IWeth",
     wmaticTokenAddress, //WMATIC mainnet polygon
@@ -152,8 +158,9 @@ async function main() {
   console.log("--------------------------------------------------------");
   console.log("Withdraw gateway");
 
+  approveErc20(wmaticTokenAddress, iWETHGateway.address, AMOUNT, deployer); //deployer in deposit
   approveErc20(
-    awmaticTokenAddress,
+    wmaticTokenAddress,
     Pool.address, // pool in deposit
     AMOUNT,
     deployer
