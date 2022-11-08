@@ -33,6 +33,8 @@
 
 - [polygonscan](https://mumbai.polygonscan.com/address/0xe86D75B2FC1BdbBE735513eF4A6D4b7Ed768B83C#code)
   - Visit the live testnet contract
+- [polygonscan2](https://mumbai.polygonscan.com/address/0x7bd6F2ACD20d8333336Bb44C8134bF5F7e936FCb)
+  - Visit a light testnet contract (ony 3 followers to raffle)
 
 ```
 git clone git@github.com:flowmi-xyz/flowmi-contract.git
