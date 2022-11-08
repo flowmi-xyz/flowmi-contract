@@ -3,8 +3,10 @@
 // 1. Pragma
 pragma solidity ^0.8.7;
 // 2. Imports
+// 2.1 VRF randomness creator
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+// 2.2 Datafeed
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "hardhat/console.sol";
 import "./PriceConverter.sol";
@@ -12,6 +14,7 @@ import "./PriceConverter.sol";
 // 3. Interfaces, Libraries, Contracts
 
 /* Errors */
+// Flowmi Logic Errors
 error Flowmi__TransferFailed();
 error Flowmi__SendMoreToEnterFlowmi();
 error Flowmi__FlowmiRaffleNotOpen();
@@ -37,22 +40,18 @@ contract FlowMi is VRFConsumerBaseV2 {
     event RequestSent(uint256 requestId, uint32 numWords);
     event RequestFulfilled(uint256 requestId, uint256[] randomWords);
 
-    // State Variables
-
-    // VRF Variables
-
     // DataFeed
     AggregatorV3Interface private i_priceFeed;
 
     // VRF Coordinator
     VRFCoordinatorV2Interface private i_vrfCoordinator;
-    uint256 public obtengoWinner;
     bytes32 private immutable i_gasLane; // 500 gwei Key Hash;
     uint32 private immutable i_callbackGasLimit;
     uint64 private immutable i_subscriptionId;
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
     uint32 private constant NUM_WORDS = 1;
 
+    // VRF Requests
     struct RequestStatus {
         bool fulfilled; // whether the request has been successfully fulfilled
         bool exists; // whether a requestId exists
@@ -64,7 +63,7 @@ contract FlowMi is VRFConsumerBaseV2 {
     uint256 public lastRequestId;
 
     // Lottery Variables
-    uint256 private immutable i_goal = 3;
+    uint256 private immutable i_goal = 10;
     uint256 private immutable i_flowmiCost = 1 * 10**17;
     uint256 private immutable prize;
     uint256 private s_index = 0;
@@ -79,6 +78,7 @@ contract FlowMi is VRFConsumerBaseV2 {
     mapping(address => uint256) private s_profileToFunds; // mapping to know how much funds has an account gathered
     mapping(address => bool) private s_profileIsFlowmi; // mapping to know if an account is registered as flowmi
     mapping(address => uint256) private s_profileToWins; // mapping to know how many times an account has won a raffle
+    mapping(address => uint256) private s_profileToRaffles; // mapping to know how many times an account has activated a raffle
 
     constructor(
         address priceFeed,
@@ -128,7 +128,7 @@ contract FlowMi is VRFConsumerBaseV2 {
         // Reads previous amount of flowmiFollower
         s_index = s_profileToFollowersCount[profileid];
         // Update total amount of funds for profile
-        s_profileToFunds[profileid] += msg.value;
+        s_profileToFunds[profileid] += 1;
         // Stores address as follower of profile
         s_profileToFollowers[profileid][s_index] = payable(msg.sender);
         s_index++;
@@ -140,6 +140,8 @@ contract FlowMi is VRFConsumerBaseV2 {
         if (
             s_index % i_goal == 0 && s_profileToFollowersCount[profileid] != 0
         ) {
+            s_profileToRaffles[profileid]++;
+
             requestRandomWords();
         }
     }
@@ -185,6 +187,7 @@ contract FlowMi is VRFConsumerBaseV2 {
             1;
 
         s_recentWinner = (s_profileToFollowers[profileid][s_indexOfWinner]);
+        s_profileToWins[s_recentWinner]++;
         pay(s_recentWinner);
     }
 
@@ -197,10 +200,6 @@ contract FlowMi is VRFConsumerBaseV2 {
         require(s_requests[_requestId].exists, "request not found");
         RequestStatus memory request = s_requests[_requestId];
         return (request.fulfilled, request.randomWords);
-    }
-
-    function getWin() public view returns (uint256) {
-        return obtengoWinner;
     }
 
     /** @notice This function transfers, just to make it more difficult to hack
@@ -315,6 +314,32 @@ contract FlowMi is VRFConsumerBaseV2 {
         returns (uint256)
     {
         return s_profileToFunds[_profileid];
+    }
+
+    /** @notice Gets total wins a profile has
+     * @param _profileid is the profile requested
+     * @return s_profileToWins[_profileid], total amount of raffles won
+     */
+
+    function getProfileToWins(address _profileid)
+        public
+        view
+        returns (uint256)
+    {
+        return s_profileToWins[_profileid];
+    }
+
+    /** @notice Gets total raffles a profile has made
+     * @param _profileid is the profile requested
+     * @return s_profileToRaffles[_profileid], total amount of raffles delivered
+     */
+
+    function getProfileToRaffles(address _profileid)
+        public
+        view
+        returns (uint256)
+    {
+        return s_profileToRaffles[_profileid];
     }
 
     /** @notice Gets the latest winner address
