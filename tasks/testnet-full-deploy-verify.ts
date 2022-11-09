@@ -3,6 +3,8 @@ import { hexlify, keccak256, RLP } from 'ethers/lib/utils';
 import fs from 'fs';
 import { task } from 'hardhat/config';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { defaultAbiCoder } from 'ethers/lib/utils';
+
 import {
   LensHub__factory,
   ApprovalFollowModule__factory,
@@ -26,12 +28,21 @@ import {
   UIDataProvider__factory,
   ProfileFollowModule__factory,
   RevertFollowModule__factory,
+  FlowmiFollowModule__factory,
 } from '../typechain-types';
 import { deployWithVerify, waitForTx } from './helpers/utils';
 
 const TREASURY_FEE_BPS = 50;
 const LENS_HUB_NFT_NAME = 'Lens Protocol Profiles';
 const LENS_HUB_NFT_SYMBOL = 'LPP';
+
+const priceFeed = '0xd0d5e3db44de05e9f294bb0a3beeaf030de24ada';
+const vrfCoordinatorV2 = '0x7a1bac17ccc5b313516c5e16fb24f7659aa5ebed';
+const subscriptionId = 2313;
+const gasLane = '0x4b09e658ed251bcafeebbc69400383d49f344ace09b9576fe248bb02c003fe9f';
+const callbackGasLimit = 2500000;
+
+console.log('shit');
 
 export let runtimeHRE: HardhatRuntimeEnvironment;
 
@@ -223,6 +234,24 @@ task(
     [lensHub.address, moduleGlobals.address],
     'contracts/core/modules/follow/FeeFollowModule.sol:FeeFollowModule'
   );
+
+  console.log('\n\t-- Deploying FlowmiFollowModule --');
+  const flowmiFollowModule = await deployWithVerify(
+    new FlowmiFollowModule__factory(deployer).deploy(
+      priceFeed,
+      vrfCoordinatorV2,
+      subscriptionId,
+      gasLane,
+      callbackGasLimit,
+      lensHub.address,
+      moduleGlobals.address,
+      {
+        nonce: deployerNonce++,
+      }
+    ),
+    [lensHub.address, moduleGlobals.address],
+    'contracts/core/modules/follow/FlowmiFollowModule.sol:FlowmiFollowModule'
+  );
   console.log('\n\t-- Deploying profileFollowModule --');
   const profileFollowModule = await deployWithVerify(
     new ProfileFollowModule__factory(deployer).deploy(lensHub.address, {
@@ -315,6 +344,9 @@ task(
     lensHub.whitelistFollowModule(feeFollowModule.address, true, { nonce: governanceNonce++ })
   );
   await waitForTx(
+    lensHub.whitelistFollowModule(flowmiFollowModule.address, true, { nonce: governanceNonce++ })
+  );
+  await waitForTx(
     lensHub.whitelistFollowModule(profileFollowModule.address, true, { nonce: governanceNonce++ })
   );
   await waitForTx(
@@ -335,6 +367,8 @@ task(
     })
   );
 
+  console.log(flowmiFollowModule.address);
+
   // Save and log the addresses
   const addrs = {
     'lensHub proxy': lensHub.address,
@@ -353,6 +387,7 @@ task(
     'revert collect module': revertCollectModule.address,
     'free collect module': freeCollectModule.address,
     'fee follow module': feeFollowModule.address,
+    'flowmi follow module': flowmiFollowModule.address,
     'profile follow module': profileFollowModule.address,
     'revert follow module': revertFollowModule.address,
     // --- COMMENTED OUT AS THIS IS NOT A LAUNCH MODULE ---
