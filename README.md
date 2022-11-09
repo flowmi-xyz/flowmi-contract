@@ -41,8 +41,9 @@ To been able to perform this task, Flowmi uses two Chainlink technologies, the [
 
 ## Quickstart
 
-- [polygonscan](https://mumbai.polygonscan.com/address/0x832B3a7038e23cbCb84bE6adfFEDE478BA174130#code)
-  - Visit the live testnet contract on lens sandbox
+- Visit live in mumbai testnet: [polygonscan](https://mumbai.polygonscan.com/address/0x832B3a7038e23cbCb84bE6adfFEDE478BA174130#code)
+
+- To try it, start by clonning this repo:
 
 ```
 git clone git@github.com:flowmi-xyz/flowmi-contract.git
@@ -130,6 +131,27 @@ Go back to [vrf.chain.link](https://vrf.chain.link) and under your subscription 
 - [polygonscan](https://mumbai.polygonscan.com/address/0x6cbA63391849C41FD84c20D08417de07426fE679#writeContract)
   - Visit the live testnet contract
 
+**Flowmi Fee:**
+
+     /** @notice Get the flowmi follow cost
+     * @return i_flowmiCost cost in dolars
+     */
+```
+    function getFlowmiCost() public pure returns (uint256) {
+        return i_flowmiCost;
+    }
+```
+
+**Flowmi PriceFeed:**
+
+   /** @notice Gets the conversion in matic for 1 usd 
+     * @return i_flowmiCost.getConversionRate(i_priceFeed)
+     */
+```
+    function getPriceFeed() public view returns (uint256) {
+        return i_flowmiCost.getConversionRate(i_priceFeed);
+    }
+```
 
 **Funds in each user:**
 
@@ -154,7 +176,7 @@ function getTotalFundedProfile(address _profileid)
      * @return s_profileToFollowersCount of the profile
      */
 ```
-    function getNumberOffollowers(address _profileid)
+    function getNumberOfFollowers(address _profileid)
         public
         view
         returns (uint256)
@@ -177,6 +199,45 @@ function getTotalFundedProfile(address _profileid)
         returns (uint256)
     {
         return s_profileToFunds[_profileid] % i_goal;
+    }
+```
+
+**Follower by index**
+
+
+ /** @notice Gets the address of a follower by index of flowmi follow
+     * @param _profileid is the profile requested
+     * @param _index is the index given to the follower when started flowmi following
+     * @return s_profileToFollowersCount in the profileid location
+     */
+```
+    function getFollowerOfIndex(address _profileid, uint256 _index) public view returns (address) {
+        return s_profileToFollowers[_profileid][_index];
+    }
+```
+
+**How many times a profile has won a flowmiRaffle**
+    
+        /** @notice Gets total wins a profile has
+     * @param _profileid is the profile requested
+     * @return s_profileToWins[_profileid], total amount of raffles won
+     */
+```
+    function getProfileToWins(address _profileid) public view returns (uint256) {
+        return s_profileToWins[_profileid];
+    }
+
+```
+
+**How many raffles my profile has given**
+
+    /** @notice Gets total raffles a profile has made
+     * @param _profileid is the profile requested
+     * @return s_profileToRaffles[_profileid], total amount of raffles delivered
+     */
+```
+    function getProfileToRaffles(address _profileid) public view returns (uint256) {
+        return s_profileToRaffles[_profileid];
     }
 ```
 
