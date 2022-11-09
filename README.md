@@ -94,7 +94,7 @@ yarn hardhat coverage
 
 1. Setup environment variabltes
 
-You'll want to set your `MUMBAI_RPC_URL` and `PRIVATE_KEY` as environment variables. You can add them to a `.env` file.
+You'll want to set your `MAINNET_RPC_URL`, the url and api key can be provided by [Quicknode](https://www.quicknode.com/endpoints). Also `PRIVATE_KEY` as environment variables. You can add them to a `.env` file.
 
 - `PRIVATE_KEY`: The private key of your account (like from [metamask](https://metamask.io/)). **NOTE:** FOR DEVELOPMENT, PLEASE USE A KEY THAT DOESN'T HAVE ANY REAL FUNDS ASSOCIATED WITH IT.
   - You can [learn how to export it here](https://metamask.zendesk.com/hc/en-us/articles/360015289632-How-to-Export-an-Account-Private-Key).
