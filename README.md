@@ -2,7 +2,7 @@
 
 *This repo has been updated to work with Mumbai - Polygon.*
 
-- What is Flowmi?
+## **What is Flowmi?**
 Flowmi is a [Lens-protocol](https://docs.lens.xyz/docs/what-is-lens) follow module, wich is like a following someone in a descentralized social network, but cooler.
 
 What is special about Flowmi is that by following a profile with the FlowmiModule, you enter a raffle asociated to that profile.
