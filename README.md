@@ -3,14 +3,16 @@
 *This repo has been updated to work with Mumbai - Polygon.*
 
 ## **What is Flowmi?**
-Flowmi is a [Lens-protocol](https://docs.lens.xyz/docs/what-is-lens) follow module, wich is like a following someone in a descentralized social network, but cooler.
+Flowmi is a 🌿[Lens-protocol](https://docs.lens.xyz/docs/what-is-lens) follow module, wich is like following someone in a descentralized social network, but in a cooler way.
 
-What is special about Flowmi is that by following a profile with the FlowmiModule, you enter a raffle asociated to that profile.
+What is special about Flowmi is that by following a profile with the FlowmiModule, you enter a raffle asociated to that profile! 🎲
 
 Flowmi will ask you for a $1 dolar contribution to the pool, and when 10 followers are gathered the raffle is activated and one of
-the followers gets the prize!
+the followers gets the prize!🏅🏅🏅
 
-To been able to perform this task, Flowmi uses two Chainlink technologies, the ["Datafeed"](https://chain.link/data-feeds) to calculate how many Matics are $1 dolar by the time you use the FlowmiModule and the ["VRF"](https://blog.chain.link/verifiable-random-function-vrf/) to calculate verifiable random numbers for the raffle. 
+To be able to perform this task, Flowmi uses two Chainlink technologies, the 🐸["Datafeed"](https://chain.link/data-feeds) to calculate how many Matics is the $1 dolar fee by the time you use the FlowmiModule, and the 🐸["VRF"](https://blog.chain.link/verifiable-random-function-vrf/) to calculate verifiable random numbers for the raffle. 
+
+Have fun!🥳
 
 - [Getting Started](#getting-started)
   - [Requirements](#requirements)
