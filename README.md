@@ -1,201 +1,213 @@
-```                                                                                                                       
-     &&&&&                        &&&&&&&&&&&&&&&&&&&&&&&&     &&&&&&&&&&              &&&&&         /&&&&&&&&&&&&&&&&&           
-     &&&&&                        &&&&&&&&&&&&&&&&&&&&&&&&     &&&&  &&&&&             &&&&&       &&&&&&(        .&&&&&&*        
-     &&&&&                        &&&&&                        &&&&   &&&&&            &&&&&      &&&&/               &&&&&       
-     &&&&&                        &&&&&                        &&&&    &&&&&           &&&&&     &&&&&                 &&&&,      
-     &&&&&                        &&&&&                        &&&&     &&&&&          &&&&&     &&&&&                 &&&&&      
-     &&&&&                        &&&&&                        &&&&      &&&&&         &&&&&      &&&&&&                          
-     &&&&&                        &&&&&                        &&&&       &&&&%        &&&&&        &&&&&&&&&&&                   
-     &&&&&                        &&&&&&&&&&&&&&&&&&&&         &&&&        &&&&/       &&&&&             &&&&&&&&&&&&&&           
-     &&&&&                        &&&&&                        &&&&         &&&&*      &&&&&                     ,&&&&&&&&        
-     &&&&&                        &&&&&                        &&&&          &&&&      &&&&&                          (&&&&&      
-     &&&&&                        &&&&&                        &&&&           &&&&     &&&&&    &&&&&                   &&&&      
-     &&&&&                        &&&&&                        &&&&            &&&&    &&&&&     &&&&                   &&&&      
-     &&&&&                        &&&&&                        &&&&            *&&&&   &&&&&     /&&&&&                &&&&&      
-     &&&&&&&&&&&&&&&&&&&&&&&&&    &&&&&&&&&&&&&&&&&&&&&&&&     &&&&             (&&&&  &&&&&       &&&&&&&         &&&&&&&        
-     &&&&&&&&&&&&&&&&&&&&&&&&&    &&&&&&&&&&&&&&&&&&&&&&&&     &&&&              %&&&&&&&&&&          &&&&&&&&&&&&&&&&&,          
-                                                                                                                                  
-                                                                                                                                  
-                                                                                                                                  
+# Flowmi SmartContract
 
-                  _( )_      _                  wWWWw   _                        _( )_      _                  wWWWw   _       
-      @@@@       (_   _)    ( )     _     @@@@  (___) _( )_          @@@@       (_   _)    ( )     _     @@@@  (___) _( )_     
-     @@()@@ wWWWw  (_)\     ( )   _( )_  @@()@@   Y  (_   _)        @@()@@ wWWWw  (_)\     ( )   _( )_  @@()@@   Y  (_   _)    
-      @@@@  (___)      |/   ( )  (_____)  @@@@   \|/   (_)\          @@@@  (___)      |/   ( )  (_____)  @@@@   \|/   (_)\      
-       /      Y       \|    (_)     |     \|      |/       |          /      Y       \|    (_)     |     \|      |/      |     
-    \ |      \|/       | / \ | /   \|/      |/    \       \|/      \ |      \|/       | / \ | /   \|/      |/    \       \|/   
-      |       |        |     |      |       |     |        |         |       |        |     |      |       |     |        |    
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   _//|\_     |        |\ _//|\_   /|\      |\_   |\___    |\     _//|\_     |        |\ _//|\_   /|\      |\_   |\___    |\   
-      | \_/  / \__    / \_   |        \   _/      |       _|         | \_/  / \__    / \_   |        \   _/      |       _|    
-     /|\_  _/       _/\       \__     /\_        / \_      |_       /|\_  _/       _/\       \__     /\_        / \_      |_    
-    / |     |        \___      \_     /\         \        /        / |     |        \___      \_     /\         \        /                         
+*This repo has been updated to work with Mumbai - Polygon.*
 
-```
+- [Getting Started](#getting-started)
+  - [Requirements](#requirements)
+  - [Quickstart](#quickstart)
+  - [Typescript](#typescript)
+- [Usage](#usage)
+  - [Testing](#testing)
+    - [Test Coverage](#test-coverage)
+- [Deployment to a testnet or mainnet](#deployment-to-a-testnet-or-mainnet)
+    - [Estimate gas cost in USD](#estimate-gas-cost-in-usd)
+  - [Verify on etherscan](#verify-on-etherscan)
+- [Testing live Mumbai Testnet](#testing-mumbai)
+- [Thank you!](#thank-you)
 
-# Lens Protocol
 
-The Lens Protocol is a decentralized, non-custodial social graph. Lens implements unique, on-chain social interaction mechanisms analogous to commonly understood Web2 social media interactions, but significantly expanded with unique functionality that empower communities to form and participants to own their own social graph.
+# Getting Started
+## Requirements
 
-## Setup
+- [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+  - You'll know you did it right if you can run `git --version` and you see a response like `git version x.x.x`
+- [Nodejs](https://nodejs.org/en/)
+  - You'll know you've installed nodejs right if you can run:
+    - `node --version` and get an ouput like: `vx.x.x`
+- [Yarn](https://yarnpkg.com/getting-started/install) instead of `npm`
+  - You'll know you've installed yarn right if you can run:
+    - `yarn --version` and get an output like: `x.x.x`
+    - You might need to [install it with `npm`](https://classic.yarnpkg.com/lang/en/docs/install/) or `corepack`
 
-> For now only Linux and macOS are known to work
->
-> We are now figuring out what works for Windows, instructions will be updated soon
->
-> (feel free to experiment and submit PR's)
+## Quickstart
 
-The environment is built using Docker Compose, note that your `.env` file must have the RPC URL of the network you want to use, and an optional `MNEMONIC` and `BLOCK_EXPLORER_KEY`, defined like so, assuming you choose to use Mumbai network:
+- [polygonscan](https://mumbai.polygonscan.com/address/0x6cbA63391849C41FD84c20D08417de07426fE679#writeContract)
+  - Visit the live testnet contract
 
 ```
-MNEMONIC="MNEMONIC YOU WANT TO DERIVE WALLETS FROM HERE"
-MUMBAI_RPC_URL="YOUR RPC URL HERE"
-BLOCK_EXPLORER_KEY="YOUR BLOCK EXPLORER API KEY HERE"
+git clone git@github.com:flowmi-xyz/flowmi-contract.git
+cd flowmi
+yarn
 ```
 
-With the environment file set up, you can move on to using Docker:
+## Typescript
 
-```bash
-export USERID=$UID && docker-compose build && docker-compose run --name lens contracts-env bash
-```
-
-If you need additional terminals:
-
-```bash
-docker exec -it lens bash
-```
-
-From there, have fun!
-
-Here are a few self-explanatory scripts:
-
-```bash
-npm run test
-npm run coverage
-npm run compile
-```
-
-Cleanup leftover Docker containers:
-
-```bash
-USERID=$UID docker-compose down
-```
-
-## Protocol Overview
-
-The Lens Protocol transfers ownership of social graphs to the participants of that graph themselves. This is achieved by creating direct links between `profiles` and their `followers`, while allowing fine-grained control of additional logic, including monetization, to be executed during those interactions on a profile-by-profile basis.
-
-Here's how it works...
-
-### Profiles
-
-Any address can create a profile and receive an ERC-721 `Lens Profile` NFT. Profiles are represented by a `ProfileStruct`:
+If you want to get to typescript and you cloned the javascript version, just run:
 
 ```
-/**
- * @notice A struct containing profile data.
- *
- * @param pubCount The number of publications made to this profile.
- * @param followNFT The address of the followNFT associated with this profile, can be empty..
- * @param followModule The address of the current follow module in use by this profile, can be empty.
- * @param handle The profile's associated handle.
- * @param uri The URI to be displayed for the profile NFT.
- */
-struct ProfileStruct {
-    uint256 pubCount;
-    address followNFT;
-    address followModule;
-    string handle;
-    string uri;
+git checkout typescript
+yarn 
+```
+
+# Usage
+
+Dependencies:
+
+```
+yarn add --dev @nomiclabs/hardhat-ethers@npm:hardhat-deploy-ethers ethers @nomiclabs/hardhat-etherscan @nomiclabs/hardhat-waffle chai ethereum-waffle hardhat hardhat-contract-sizer hardhat-deploy hardhat-deploy-ethers hardhat-gas-reporter prettier prettier-plugin-solidity solhint solidity-coverage dotenv @nomicfoundation/hardhat-toolbox @chainlink/contracts@0.4.1
+```
+
+Deploy:
+
+```
+yarn hardhat deploy
+```
+
+## Testing
+
+```
+yarn hardhat test
+```
+
+### Test Coverage
+
+```
+yarn hardhat coverage
+```
+
+
+
+# Deployment to a testnet or mainnet
+
+1. Setup environment variabltes
+
+You'll want to set your `MUMBAI_RPC_URL` and `PRIVATE_KEY` as environment variables. You can add them to a `.env` file.
+
+- `PRIVATE_KEY`: The private key of your account (like from [metamask](https://metamask.io/)). **NOTE:** FOR DEVELOPMENT, PLEASE USE A KEY THAT DOESN'T HAVE ANY REAL FUNDS ASSOCIATED WITH IT.
+  - You can [learn how to export it here](https://metamask.zendesk.com/hc/en-us/articles/360015289632-How-to-Export-an-Account-Private-Key).
+- `MUMBAI_RPC_URL`: This is url of the mumbai testnet node you're working with. 
+
+2. Get testnet ETH and MATIC
+
+Head over to [faucets.chain.link](https://faucets.chain.link/) and get some tesnet ETH & LINK, also to (https://mumbaifaucet.com/) and get testnet MATIC. You should see the ETH and LINK show up in your metamask. [You can read more on setting up your wallet with LINK.](https://docs.chain.link/docs/deploy-your-first-contract/#install-and-fund-your-metamask-wallet)
+
+3. Setup a Chainlink VRF Subscription ID
+
+Head over to [vrf.chain.link](https://vrf.chain.link/) and setup a new subscription, and get a subscriptionId. You can reuse an old subscription if you already have one. 
+
+[You can follow the instructions](https://docs.chain.link/docs/get-a-random-number/) if you get lost. You should leave this step with:
+
+1. A subscription ID
+2. Your subscription should be funded with LINK
+
+3. Deploy
+
+In your `helper-hardhat-config.js` add your `subscriptionId` under the section of the chainId you're using (aka, if you're deploying to goerli, add your `subscriptionId` in the `subscriptionId` field under the `4` section.)
+
+Then run:
+```
+yarn hardhat deploy --network mumbai
+```
+
+And copy / remember the contract address. 
+
+4. Add your contract address as a Chainlink VRF Consumer
+
+Go back to [vrf.chain.link](https://vrf.chain.link) and under your subscription add `Add consumer` and add your contract address. You should also fund the contract with a minimum of 1 LINK. 
+
+
+# Testing live Mumbai Testnet (#testing-mumbai)
+- [polygonscan](https://mumbai.polygonscan.com/address/0x6cbA63391849C41FD84c20D08417de07426fE679#writeContract)
+  - Visit the live testnet contract
+
+
+**Funds in each user:**
+
+    /** @notice Gets total funds a profile has been given
+     * @param _profileid is the profile requested
+     * @return s_profileToFunds[_profileid], total amount of funds related to the profile
+     */
+```
+function getTotalFundedProfile(address _profileid)
+        public
+        view
+        returns (uint256)
+    {
+        return s_profileToFunds[_profileid];
+    }
+```
+
+**Number of Flowmi Followers of account:**
+
+    /** @notice Gets the number of followers a profile has
+     * @param _profileid is the profile
+     * @return s_profileToFollowersCount of the profile
+     */
+```
+    function getNumberOffollowers(address _profileid)
+        public
+        view
+        returns (uint256)
+    {
+        return s_profileToFollowersCount[_profileid];
+    }
+```
+
+**Funds to-raffle (amount of funds able to be raffled):**
+
+    /** @notice Gets funds a profile has to give in the next raffle
+     * @param _profileid is the profile requested
+     * @return s_profileToFunds[_profileid] % i_goal, total amount of funds related to the profile
+     * "modulo" the goal of the raffle, so it only counts what's haven't been raffled yet
+     */
+```
+ function getFundsToRaffle(address _profileid)
+        public
+        view
+        returns (uint256)
+    {
+        return s_profileToFunds[_profileid] % i_goal;
+    }
+```
+
+**Flowmi Follow:** a user calls this function with the address of the profile id to follow. If the goal is reached, a raffle is summoned. 
+
+    /** @notice Gets the amount that an address has funded
+     * Funds our contract based on the MATIC/USD price
+     * Any account can call this function to flowmi follow a registered flowmi account
+     *  @param _profileid is the address of the registered account
+     *   Iniciates the request for a random word to the VRF
+     */
+
+```
+function flowmiFollow(address _profileid) public payable {
+...
 }
 ```
 
-Profiles have a specific URI associated with them, which is meant to include metadata, such as a link to a profile picture or a display name for instance, the JSON standard for this URI is not yet determined. Profile owners can always change their follow module or profile URI.
 
-#### Publications
 
-Profile owners can `publish` to any profile they own. There are three `publication` types: `Post`, `Comment` and `Mirror`. Profile owners can also set and initialize the `Follow Module` associated with their profile.
+### Estimate gas cost in USD
 
-Publications are on-chain content created and published via profiles. Profile owners can create (publish) three publication types, outlined below. They are represented by a `PublicationStruct`:
+To get a USD estimation of gas cost, you'll need a `COINMARKETCAP_API_KEY` environment variable. You can get one for free from [CoinMarketCap](https://pro.coinmarketcap.com/signup). 
 
-```
-/**
- * @notice A struct containing data associated with each new publication.
- *
- * @param profileIdPointed The profile token ID this publication points to, for mirrors and comments.
- * @param pubIdPointed The publication ID this publication points to, for mirrors and comments.
- * @param contentURI The URI associated with this publication.
- * @param referenceModule The address of the current reference module in use by this profile, can be empty.
- * @param collectModule The address of the collect module associated with this publication, this exists for all publication.
- * @param collectNFT The address of the collectNFT associated with this publication, if any.
- */
-struct PublicationStruct {
-    uint256 profileIdPointed;
-    uint256 pubIdPointed;
-    string contentURI;
-    address referenceModule;
-    address collectModule;
-    address collectNFT;
-}
-```
+Then, uncomment the line `coinmarketcap: COINMARKETCAP_API_KEY,` in `hardhat.config.js` to get the USD estimation. Just note, everytime you run your tests it will use an API call, so it might make sense to have using coinmarketcap disabled until you need it. You can disable it by just commenting the line back out. 
 
-#### Publication Types
 
-##### Post
 
-This is the standard publication type, akin to a regular post on traditional social media platforms. Posts contain:
+## Verify on etherscan
 
-1. A URI, pointing to the actual publication body's [metadata](https://docs.lens.xyz/docs/metadata-standards) JSON, including any images or text.
-2. An uninitialized pointer, since pointers are only needed in mirrors and comments.
+If you deploy to a testnet or mainnet, you can verify it if you get an [API Key](https://etherscan.io/myapikey) from Etherscan and set it as an environemnt variable named `ETHERSCAN_API_KEY`. You can pop it into your `.env` file as seen in the `.env.example`.
 
-##### Comment
+In it's current state, if you have your api key set, it will auto verify goerli contracts!
 
-This is a publication type that points back to another publication, whether it be a post, comment or mirror, akin to a regular comment on traditional social media. Comments contain:
 
-1. A URI, just like posts, pointing to the publication body's [metadata](https://docs.lens.xyz/docs/metadata-standards) JSON.
-2. An initialized pointer, containing the profile ID and the publication ID of the publication commented on.
 
-##### Mirror
+# Thank you!
 
-This is a publication type that points to another publication, note that mirrors cannot, themselves, be mirrored (doing so instead mirrors the pointed content). Mirrors have no original content of its own. Akin to a "share" on traditional social media. Mirrors contain:
+If you appreciated this, feel free to follow me! or donate!
 
-1. An empty URI, since they cannot have content associated with them.
-2. An initialized pointer, containing the profile ID and the publication ID of the mirrored publication.
+ETH/Polygon/Avalanche/etc Address: 0xD5D8681f034e5C1C16303BA5B94Cc88EC14aFe51
 
-### Profile Interaction
-
-There are two types of profile interactions: follows and collects.
-
-#### Follows
-
-Wallets can follow profiles, executing modular follow processing logic (in that profile's selected follow module) and receiving a `Follow NFT`. Each profile has a connected, unique `FollowNFT` contract, which is first deployed upon successful follow. Follow NFTs are NFTs with integrated voting and delegation capability.
-
-The inclusion of voting and delegation right off the bat means that follow NFTs have the built-in capability to create a spontaneous DAO around any profile. Furthermore, holding follow NFTs allows followers to `collect` publications from the profile they are following (except mirrors, which are equivalent to shares in Web2 social media, and require following the original publishing profile to collect).
-
-#### Collects
-
-Collecting works in a modular fashion as well, every publication (except mirrors) requires a `Collect Module` to be selected and initialized. This module, similarly to follow modules, can contain any arbitrary logic to be executed upon collects. Successful collects result in a new, unique NFT being minted, essentially as a saved copy of the original publication. There is one deployed collect NFT contract per publication, and it's deployed upon the first successful collect.
-
-When a mirror is collected, what happens behind the scenes is the original, mirrored publication is collected, and the mirror publisher's profile ID is passed as a "referrer." This allows neat functionality where collect modules that incur a fee can, for instance, reward referrals. Note that the `Collected` event, which is emitted upon collection, indexes the profile and publication directly being passed, which, in case of a mirror, is different than the actual original publication getting collected (which is emitted unindexed).
-
-Alright, that was a mouthful! Let's move on to more specific details about Lens's core principle: Modularity.
-
-## Lens Modularity
-
-Stepping back for a moment, the core concept behind modules is to allow as much freedom as possible to the community to come up with new, innovative interaction mechanisms between social graph participants. For security purposes, this is achieved by including a whitelisted list of modules controlled by governance.
-
-To recap, the Lens Protocol has three types of modules:
-
-1. `Follow Modules` contain custom logic to be executed upon follow.
-2. `Collect Modules` contain custom logic to be executed upon collect. Typically, these modules include at least a check that the collector is a follower.
-3. `Reference Modules` contain custom logic to be executed upon comment and mirror. These modules can be used to limit who is able to comment and interact with a profile.
-
-Note that collect and reference modules should _not_ assume that a publication cannot be re-initialized, and thus should include front-running protection as a security measure if needed, as if the publication data was not static. This is even more prominent in follow modules, where it can absolutely be changed for a given profile.
-
-Lastly, there is also a `ModuleGlobals` contract which acts as a central data provider for modules. It is controlled by a specific governance address which can be set to a different executor compared to the Hub's governance. It's expected that modules will fetch dynamically changing data, such as the module globals governance address, the treasury address, the treasury fee as well as a list of whitelisted currencies.
-
-### Upgradeability
-
-This iteration of the Lens Protocol implements a transparent upgradeable proxy for the central hub to be controlled by governance. There are no other aspects of the protocol that are upgradeable. In an ideal world, the hub will not require upgrades due to the system's inherent modularity and openness, upgradeability is there only to implement new, breaking changes that would be impossible, or unreasonable to implement otherwise.
-
-This does come with a few caveats, for instance, the `ModuleGlobals` contract implements a currency whitelist, but it is not upgradeable, so the "removal" of a currency whitelist in a module would require a specific new module that does not query the `ModuleGlobals` contract for whitelisted currencies.
+[![Daniel Beltrán Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=for-the-badge&logo=twitter&logoColor=white)](https://twitter.com/bvdani_el)
+[![Daniel Beltrán Linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/danielbeltranv/)
