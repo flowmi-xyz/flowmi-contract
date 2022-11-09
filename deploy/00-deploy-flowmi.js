@@ -1,4 +1,6 @@
-const { network, ethers } = require('hardhat');
+const { network, deployments, ethers, getNamedAccounts } = require('hardhat');
+import { LensHub__factory } from '../typechain-types';
+
 const {
   networkConfig,
   developmentChains,
@@ -11,12 +13,18 @@ const FUND_AMOUNT = ethers.utils.parseEther('10'); // 1 Ether, or 1e18 (10^18) W
 
 module.exports = async ({ getNamedAccounts, deployments }) => {
   const { deploy, log } = deployments;
+  const accounts = await ethers.getSigners();
+
   const { deployer } = await getNamedAccounts();
+
   const chainId = network.config.chainId;
 
-  let vrfCoordinatorV2Address, subscriptionId, vrfCoordinatorV2Mock, maticUsdPriceFeedAddress;
-  let hub = '0x60Ae865ee4C725cd04353b5AAb364553f56ceF82';
-  let moduleGlobals = '0x1353aAdfE5FeD85382826757A95DE908bd21C4f9';
+  let vrfCoordinatorV2Address,
+    subscriptionId,
+    vrfCoordinatorV2Mock,
+    maticUsdPriceFeedAddress,
+    hub,
+    moduleGlobals;
 
   if (chainId == 31337) {
     // create VRFV2 Subscription
@@ -36,6 +44,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     vrfCoordinatorV2Address = networkConfig[chainId]['vrfCoordinatorV2'];
     subscriptionId = networkConfig[chainId]['subscriptionId'];
     maticUsdPriceFeedAddress = networkConfig[chainId]['maticUsdPriceFeed'];
+    hub = networkConfig[chainId]['hub'];
+    moduleGlobals = networkConfig[chainId]['moduleGlobals'];
   }
   const waitBlockConfirmations = developmentChains.includes(network.name)
     ? 1
@@ -59,7 +69,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     // we need to wait if on a live network so we can verify properly
     waitConfirmations: network.config.blockConfirmations || 1,
   });
-  log(`FlowMi deployed at ${flowMi.address}`);
+  log(`FlowmiFollowModule deployed at ${flowMi.address}`);
 
   // Verify the deployment
   if (!developmentChains.includes(network.name) && process.env.POLYGONSCAN_API_KEY) {

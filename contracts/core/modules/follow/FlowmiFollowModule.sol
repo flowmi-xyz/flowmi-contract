@@ -42,11 +42,10 @@ struct ProfileData {
 }
 
 /**
- * @title FeeFollowModule
- * @author Lens Protocol
- *
- * @notice This is a simple Lens FollowModule implementation, inheriting from the IFollowModule interface, but with additional
- * variables that can be controlled by governance, such as the governance & treasury addresses as well as the treasury fee.
+/**@title Flowmi contract
+ * @author Daniel Beltrán
+ * @notice This contract is for raffling funds on flowmi, a pay-to-follow dapp
+ * @dev This implements price feeds as our library
  */
 contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidatorFollowModuleBase {
     // Type Declarations
@@ -176,13 +175,6 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         uint256 treasuryAmount = (amount * treasuryFee) / BPS_MAX;
         uint256 adjustedAmount = amount - treasuryAmount;
 
-        /* IERC20(currency).safeTransferFrom(follower, recipient, adjustedAmount);
-        if (treasuryAmount > 0)
-            IERC20(currency).safeTransferFrom(
-                follower,
-                treasury,
-                treasuryAmount
-            );*/
         profileid = payable(recipient);
 
         // Check if profile to flowmiFollow is registered
@@ -240,8 +232,6 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
     }
 
     //--------------------------VRF and Flowmi Functions-----------------------------------//
-    // Internal VRF function to request a random word
-    // Raffle
 
     modifier onlyOwner() {
         require(msg.sender == i_flowmiOwner, 'Must be owner');
@@ -249,6 +239,7 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
     }
 
     // Assumes the subscription is funded sufficiently.
+
     function requestRandomWords() internal returns (uint256 requestId) {
         // Will revert if subscription is not set and funded.
         requestId = i_vrfCoordinator.requestRandomWords(

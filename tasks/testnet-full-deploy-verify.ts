@@ -367,8 +367,6 @@ task(
     })
   );
 
-  console.log(flowmiFollowModule.address);
-
   // Save and log the addresses
   const addrs = {
     'lensHub proxy': lensHub.address,
