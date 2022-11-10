@@ -225,25 +225,22 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
     ) external override onlyHub {
         uint256 amount = _dataByProfile[profileId].amount;
         address currency = _dataByProfile[profileId].currency;
-        _validateDataIsExpected(data, currency, amount);
+        // _validateDataIsExpected(data, currency, amount);
+        (uint256 amount_paid, address currency_paid, address recipient_paid) = abi.decode(
+            data,
+            (uint256, address, address)
+        );
+        //address recipient = _dataByProfile[profileId].recipient;
 
-        (address treasury, uint16 treasuryFee) = _treasuryData();
-        address recipient = _dataByProfile[profileId].recipient;
+        profileid = payable(recipient_paid);
 
-        profileid = payable(recipient);
-
-        /* Check if profile to flowmiFollow is registered
-        if (!s_profileIsFlowmi[profileid]) {
-            revert Flowmi__MustBeRegisteredFlowmi();
-        }*/
+        // Check the entrance fee is correct with Pricefeed for USD/Matic
+        if (amount_paid.getConversionRate(i_priceFeed) < i_flowmiCost) {
+            revert Flowmi__SendMoreToEnterFlowmi();
+        }
         // Check that you are not following yourself
         if (follower == profileid) {
             revert Flowmi__CantFlowmiFollowYourself();
-        }
-        // aqui msg.value podría ser amount
-        // Check the entrance fee is correct with Pricefeed for USD/Matic
-        if (amount.getConversionRate(i_priceFeed) < i_flowmiCost) {
-            revert Flowmi__SendMoreToEnterFlowmi();
         }
         // Reads previous amount of flowmiFollower
         s_index = s_profileToFollowersCount[profileid];
