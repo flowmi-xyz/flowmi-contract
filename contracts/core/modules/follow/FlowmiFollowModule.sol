@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 // 1. Pragma
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
 // 2. Imports
 // 2.1 VRF randomness creator
