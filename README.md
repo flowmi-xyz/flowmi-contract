@@ -83,6 +83,26 @@ yarn hardhat deploy
 If you want to test the module, you can follow the [lens-prtotocol guide](https://docs.lens.xyz/docs/testing-a-module)
 
 ### AAVE testing
+
+The script aaveFlowmiFollow.js is performed in a local forked polygon mainnet.
+It tests the 2 ways to deposit and withdraw tokens from a Matic Aave Liquidity Pool.
+These 2 ways are:
+  1. Wrapping, deposit, withdraw, unwrap.
+  2. deposit through Gateway, withdraw through Gateway.
+  
+In the second option it's not necesary to wrap and unwrap cause the WETHGateway takes care of that.
+So the steps tested are:
+
+1. Deposit 1 Matic in the Gateway: It's supposed to wrap and deposit matics for you.
+It actually only wraps in this setup.
+2. Wrap: deposit another Matic in the WMatic contract to swap Matics for WMatics
+3. Deposit in the pool: You deposit both the gateway and the wrapped token to the
+aave liquidity pool. You get aTokens in return. 
+4. Withdraw from the pool: You should get 1 WMatic.
+5. Unwrap tokens withdrawn: You should have now 0 WMatics.
+6. Withdraw through the Gateway: It should withdraw the last WMatic and unwrap it
+It doesn't work by the date this code was written (nov-10-2022)
+
 ```
 yarn hardhat run scripts/aaveFlowmiFollow.js
 ```
