@@ -209,12 +209,12 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         onlyHub
         returns (bytes memory)
     {
-        (uint256 amount, address currency, address recipient) = abi.decode(
+        /*   (uint256 amount, address currency, address recipient) = abi.decode(
             data,
             (uint256, address, address)
         );
         if (!_currencyWhitelisted(currency) || recipient == address(0) || amount == 0)
-            revert Errors.InitParamsInvalid();
+            revert Errors.InitParamsInvalid();*/
 
         _dataByProfile[profileId].amount = amount;
         _dataByProfile[profileId].currency = currency;
