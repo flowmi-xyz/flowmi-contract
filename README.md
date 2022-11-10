@@ -146,7 +146,7 @@ Go back to [vrf.chain.link](https://vrf.chain.link) and under your subscription 
 
 **Flowmi PriceFeed:**
 
-   /** @notice Gets the conversion in matic for 1 usd 
+       /** @notice Gets the conversion in matic for 1 usd 
      * @return i_flowmiCost.getConversionRate(i_priceFeed)
      */
 ```
@@ -206,8 +206,7 @@ function getTotalFundedProfile(address _profileid)
 
 **Follower by index**
 
-
- /** @notice Gets the address of a follower by index of flowmi follow
+        /** @notice Gets the address of a follower by index of flowmi follow
      * @param _profileid is the profile requested
      * @param _index is the index given to the follower when started flowmi following
      * @return s_profileToFollowersCount in the profileid location
