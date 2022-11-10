@@ -10,7 +10,7 @@ What is special about Flowmi is that by following a profile with the FlowmiModul
 Flowmi will ask you for a $1 dolar contribution to the pool, and when 10 followers are gathered the raffle is activated and one of
 the followers gets the prize!🏅🏅🏅
 
-But not only that! while the fees are in the contract, we earn interest by depositing the tokens in a liquidity pool provided by the 👻 [Aave](https://aave.com/) protocol and if you win the Flowmi Raffle, you get a prize in [Aave Wraped Matic Token](https://mumbai.polygonscan.com/token/0x89a6ae840b3f8f489418933a220315eea36d11ff?a=0xe19c50623289a8eb24b6d9d99f9baf6c087ae287), which you can redeem for Matics anytime you want! it will earn intereset while you don't redeem it!! 😎).
+But not only that! while the fees are in the contract, we earn interest by depositing the tokens in a liquidity pool provided by the 👻 [Aave](https://aave.com/) protocol and if you win the Flowmi Raffle, you get a prize in [Aave Wraped Matic Token](https://mumbai.polygonscan.com/token/0x89a6ae840b3f8f489418933a220315eea36d11ff?a=0xe19c50623289a8eb24b6d9d99f9baf6c087ae287), which you can redeem for Matics anytime you want! it will earn intereset while you don't redeem it!! 😎.
 
 To be able to perform this task, Flowmi uses two Chainlink technologies, the 🐸["Datafeed"](https://chain.link/data-feeds) to calculate how many Matics is the $1 dolar fee by the time you use the FlowmiModule, and the 🐸["VRF"](https://blog.chain.link/verifiable-random-function-vrf/) to calculate verifiable random numbers for the raffle. 
 
