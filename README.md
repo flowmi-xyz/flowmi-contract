@@ -2,8 +2,8 @@
 
 *This repo has been updated to work with Mumbai - Polygon.*
 
-## **What is FlowmiAave?**
-Flowmi is a smart contract, build to work in a social network, for you can follow a profile but in a cooler way.
+## **What is Flowmi?**
+🎁 Flowmi is a smart contract, build to work in a social network, for you can follow a profile but in a cooler way.
 
 What is special about Flowmi is that by following a profile with the FlowmiModule, you enter a raffle asociated to that profile! 🎲
 
