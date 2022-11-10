@@ -12,7 +12,7 @@ the followers gets the prize!🏅🏅🏅
 
 But not only that! while the fees are in the contract, we earn interest by depositing the tokens in a liquidity pool provided by the 👻 [Aave](https://aave.com/) protocol.
 
-To be able to perform this task, Flowmi uses two Chainlink technologies, the 🐸["Datafeed"](https://chain.link/data-feeds) to calculate how many Matics is the $1 dolar fee by the time you use the FlowmiModule, and the 🐸["VRF"](https://blog.chain.link/verifiable-random-function-vrf/) to calculate verifiable random numbers for the raffle. 
+To be able to perform this task, Flowmi uses two Chainlink technologies, the 🐸["Datafeed"](https://chain.link/data-feeds) to calculate the equivalent on Matics of the $1 dolar fee by the time you use the FlowmiModule, and the 🐸["VRF"](https://blog.chain.link/verifiable-random-function-vrf/) to calculate verifiable random numbers for the raffle. 
 
 Have fun!🥳
 
