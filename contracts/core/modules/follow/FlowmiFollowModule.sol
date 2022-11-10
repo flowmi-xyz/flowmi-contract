@@ -12,8 +12,8 @@ import '@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol';
 import 'hardhat/console.sol';
 import './PriceConverter.sol';
 // 2.3 Lens
-import {IFollowModule} from '../../../interfaces/IFollowModule.sol'; // FeeFollowModule 0x60Ae865ee4C725cd04353b5AAb364553f56ceF82
-import {ILensHub} from '../../../interfaces/ILensHub.sol'; //lens hub proxy 0x60Ae865ee4C725cd04353b5AAb364553f56ceF82
+import {IFollowModule} from '../../../interfaces/IFollowModule.sol';
+import {ILensHub} from '../../../interfaces/ILensHub.sol';
 import {Errors} from '../../../libraries/Errors.sol';
 import {FeeModuleBase} from '../FeeModuleBase.sol';
 import {ModuleBase} from '../ModuleBase.sol';
