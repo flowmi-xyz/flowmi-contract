@@ -80,9 +80,7 @@ yarn hardhat deploy
 
 ## Testing
 
-```
-yarn hardhat test
-```
+If you want to test the module, you can follow the [lens-prtotocol guide](https://docs.lens.xyz/docs/testing-a-module)
 
 ### AAVE testing
 ```
