@@ -24,7 +24,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     vrfCoordinatorV2Mock,
     maticUsdPriceFeedAddress,
     hub,
-    moduleGlobals;
+    moduleGlobals,
+    awmaticAddress,
+    wGatewayAddress;
 
   if (chainId == 31337) {
     // create VRFV2 Subscription
@@ -46,6 +48,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     maticUsdPriceFeedAddress = networkConfig[chainId]['maticUsdPriceFeed'];
     hub = networkConfig[chainId]['hub'];
     moduleGlobals = networkConfig[chainId]['moduleGlobals'];
+    awmaticAddress = networkConfig[chainId]['awmaticAddress'];
+    wGatewayAddress = networkConfig[chainId]['wGatewayAddress'];
   }
   const waitBlockConfirmations = developmentChains.includes(network.name)
     ? 1
@@ -61,6 +65,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     networkConfig[chainId]['callbackGasLimit'],
     hub,
     moduleGlobals,
+    awmaticAddress,
+    wGatewayAddress,
   ];
   const flowMi = await deploy('FlowmiFollowModule', {
     from: deployer,

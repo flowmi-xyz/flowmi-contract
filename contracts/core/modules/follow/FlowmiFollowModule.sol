@@ -24,7 +24,6 @@ import {IERC721} from '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 
 // 2.4 Aave
 import {IPool} from '@aave/core-v3/contracts/interfaces/IPool.sol';
-import {IERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
 import {IAToken} from '@aave/core-v3/contracts/interfaces/IAToken.sol';
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
 import {IWETHGateway} from '@aave/periphery-v3/contracts/misc/interfaces/IWETHGateway.sol';
@@ -99,29 +98,19 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
     IPoolAddressesProvider private immutable i_poolAddressesProvider;
     IPool private immutable POOL;
     uint16 private constant AAVE_REF_CODE = 0;
-    uint256 private immutable poolFraction = 95;
+    uint256 private immutable poolFraction = 99;
     // Sondas Aaave
     uint256 private indeposit;
     uint256 private inwithdraw;
 
     // Direcciones de matic
-    address private maticTokenAddress =
-        // 0x0000000000000000000000000000000000001010;
-        0xD65d229951E94a7138F47Bd9e0Faff42A7aCe0c6; // token in mumbai testnet
-    address private wmaticTokenAddress =
-        // 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270; // wrapped mainnet
-        0xb685400156cF3CBE8725958DeAA61436727A30c3; // wrapped testnet
-    address private awmaticTokenAddress =
-        //0x6d80113e533a2C0fe82EaBD35f1875DcEA89Ea97;
-        0x89a6AE840b3F8f489418933A220315eeA36d11fF; // atoken testnet
+    address private immutable i_awmaticTokenAddress;
 
-    IERC20 private imatic;
-    IERC20 public iWmatic;
     IERC20 public iaWmatic;
 
     // Direcciones de la WETHGateway
 
-    address private WETHGatewayAddress = 0x2a58E9bbb5434FdA7FF78051a4B82cb0EF669C17; // testnet
+    address private immutable i_WETHGatewayAddress;
     IWETHGateway private iWETHGateway;
 
     event Deposit(address indexed userAddr, uint256 amount);
@@ -162,7 +151,9 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         uint32 callbackGasLimit,
         address hub,
         address moduleGlobals,
-        address poolAddressesProvider
+        address poolAddressesProvider,
+        address awmaticTokenAddress,
+        address WETHGatewayAddress
     ) VRFConsumerBaseV2(vrfCoordinatorV2) FeeModuleBase(moduleGlobals) ModuleBase(hub) {
         i_priceFeed = AggregatorV3Interface(priceFeed);
         i_flowmiOwner = payable(msg.sender);
@@ -176,10 +167,10 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         //Pool
         i_poolAddressesProvider = IPoolAddressesProvider(poolAddressesProvider);
         POOL = IPool(i_poolAddressesProvider.getPool());
+
         // Token Interfaces
-        imatic = IERC20(maticTokenAddress);
-        iWmatic = IERC20(wmaticTokenAddress);
-        iaWmatic = IERC20(awmaticTokenAddress);
+        i_awmaticTokenAddress = awmaticTokenAddress;
+        iaWmatic = IERC20(i_awmaticTokenAddress);
         fraction = (i_flowmiCost * poolFraction) / 100;
         _withdrawAmmount = fraction * (i_goal - 1);
         prize = i_goal * fraction;
@@ -187,6 +178,7 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         indeposit = 0;
         inwithdraw = 0;
         // IWETHGateway
+        i_WETHGatewayAddress = WETHGatewayAddress;
         iWETHGateway = IWETHGateway(WETHGatewayAddress);
     }
 
@@ -209,14 +201,14 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         onlyHub
         returns (bytes memory)
     {
-        /*   (uint256 amount, address currency, address recipient) = abi.decode(
+        (uint256 amount, address currency, address recipient) = abi.decode(
             data,
             (uint256, address, address)
-        );
+        ); /*
         if (!_currencyWhitelisted(currency) || recipient == address(0) || amount == 0)
             revert Errors.InitParamsInvalid();*/
 
-        _dataByProfile[profileId].amount = amount;
+        _dataByProfile[profileId].amount = i_flowmiCost;
         _dataByProfile[profileId].currency = currency;
         _dataByProfile[profileId].recipient = recipient;
         return data;
