@@ -1,5 +1,4 @@
 const { network, deployments, ethers, getNamedAccounts } = require('hardhat');
-import { LensHub__factory } from '../typechain-types';
 
 const {
   networkConfig,
@@ -50,6 +49,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     moduleGlobals = networkConfig[chainId]['moduleGlobals'];
     awmaticAddress = networkConfig[chainId]['awmaticAddress'];
     wGatewayAddress = networkConfig[chainId]['wGatewayAddress'];
+    aavePoolAdressesProvider = networkConfig[chainId]['aavePoolAdressesProvider'];
   }
   const waitBlockConfirmations = developmentChains.includes(network.name)
     ? 1
@@ -65,6 +65,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     networkConfig[chainId]['callbackGasLimit'],
     hub,
     moduleGlobals,
+    aavePoolAdressesProvider,
     awmaticAddress,
     wGatewayAddress,
   ];

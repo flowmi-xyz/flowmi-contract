@@ -24,6 +24,7 @@ const networkConfig = {
     // '0x60Ae865ee4C725cd04353b5AAb364553f56ceF82'; //mumbai
     moduleGlobals: '0xcbCC5b9611d22d11403373432642Df9Ef7Dd81AD', // sandbox
     //'0x1353aAdfE5FeD85382826757A95DE908bd21C4f9';//mumbai
+    aavePoolAdressesProvider: '0x5343b5bA672Ae99d627A1C87866b8E53F47Db2E6', // polygon testnet pool
     awmaticAddress: '0x89a6AE840b3F8f489418933A220315eeA36d11fF',
     wGatewayAddress: '0x2a58E9bbb5434FdA7FF78051a4B82cb0EF669C17',
   },

@@ -210,7 +210,7 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
 
         _dataByProfile[profileId].amount = i_flowmiCost;
         _dataByProfile[profileId].currency = currency;
-        _dataByProfile[profileId].recipient = recipient;
+        _dataByProfile[profileId].recipient = recipient; // address del profile id
         return data;
     }
 
@@ -229,8 +229,6 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
 
         (address treasury, uint16 treasuryFee) = _treasuryData();
         address recipient = _dataByProfile[profileId].recipient;
-        uint256 treasuryAmount = (amount * treasuryFee) / BPS_MAX;
-        uint256 adjustedAmount = amount - treasuryAmount;
 
         profileid = payable(recipient);
 
@@ -366,23 +364,23 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
     }
 
     /** @notice This function registers a profile
-     */
+     
     function registerProfile() public {
         s_profileIsFlowmi[msg.sender] = true;
     }
 
     /** @notice Let's you know if a profile is a flowmi registered profile
      *  @param _profileid is the address of the profile
-     */
+     *
     function isRegisteredProfile(address _profileid) public view returns (bool) {
         return s_profileIsFlowmi[_profileid];
     }
 
     /** @notice Unregisters a profile making the mapping value false
-     */
+     *
     function unregisterProfile() public {
         s_profileIsFlowmi[msg.sender] = false;
-    }
+    }*/
 
     /** @notice Let's you know how much is in aave protocol
      */
