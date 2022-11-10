@@ -22,12 +22,25 @@ import {IERC20} from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import {SafeERC20} from '@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol';
 import {IERC721} from '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 
+// 2.4 Aave
+import {IPool} from '@aave/core-v3/contracts/interfaces/IPool.sol';
+import {IERC20} from '@aave/core-v3/contracts/dependencies/openzeppelin/contracts/IERC20.sol';
+import {IAToken} from '@aave/core-v3/contracts/interfaces/IAToken.sol';
+import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
+import {IWETHGateway} from '@aave/periphery-v3/contracts/misc/interfaces/IWETHGateway.sol';
+
 // Flowmi Logic Errors
 error Flowmi__TransferFailed();
 error Flowmi__SendMoreToEnterFlowmi();
 error Flowmi__FlowmiRaffleNotOpen();
 error Flowmi__MustBeRegisteredFlowmi();
 error Flowmi__CantFlowmiFollowYourself();
+// Liquidity Errors
+error Error__NotEnoughBalance(uint256 balance, uint256 depositAmount);
+error Error__NotEnoughAllowance(uint256 allowance, uint256 depositAmount);
+error Error__NotEnoughLP(uint256 lpAmount);
+error Error__AmountIsZero();
+error Error__InvalidToken(address token);
 /**
  * @notice A struct containing the necessary data to execute follow actions on a given profile.
  *
@@ -82,6 +95,40 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
     uint256[] public requestIds;
     uint256 public lastRequestId;
 
+    // Liquidity Provider
+    IPoolAddressesProvider private immutable i_poolAddressesProvider;
+    IPool private immutable POOL;
+    uint16 private constant AAVE_REF_CODE = 0;
+    uint256 private immutable poolFraction = 95;
+    // Sondas Aaave
+    uint256 private indeposit;
+    uint256 private inwithdraw;
+
+    // Direcciones de matic
+    address private maticTokenAddress =
+        // 0x0000000000000000000000000000000000001010;
+        0xD65d229951E94a7138F47Bd9e0Faff42A7aCe0c6; // token in mumbai testnet
+    address private wmaticTokenAddress =
+        // 0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270; // wrapped mainnet
+        0xb685400156cF3CBE8725958DeAA61436727A30c3; // wrapped testnet
+    address private awmaticTokenAddress =
+        //0x6d80113e533a2C0fe82EaBD35f1875DcEA89Ea97;
+        0x89a6AE840b3F8f489418933A220315eeA36d11fF; // atoken testnet
+
+    IERC20 private imatic;
+    IERC20 public iWmatic;
+    IERC20 public iaWmatic;
+
+    // Direcciones de la WETHGateway
+
+    address private WETHGatewayAddress = 0x2a58E9bbb5434FdA7FF78051a4B82cb0EF669C17; // testnet
+    IWETHGateway private iWETHGateway;
+
+    event Deposit(address indexed userAddr, uint256 amount);
+    event Withdraw(address indexed userAddr, uint256 amount);
+
+    mapping(address => uint256) public balances; // How much is collateralized by flowmi
+
     // Lottery Variables
     uint256 private immutable i_goal = 3;
     uint256 private immutable i_flowmiCost = 1 * 10**17;
@@ -91,6 +138,8 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
     address payable profileid;
     address payable s_recentWinner;
     address payable i_flowmiOwner;
+    uint256 private immutable fraction;
+    uint256 private _withdrawAmmount;
 
     mapping(address => mapping(uint256 => address payable)) private s_profileToFollowers; // mapping of profile to index to follower address
     mapping(address => uint256) private s_profileToFollowersCount; // mapping to know the amount of followers an account has
@@ -112,17 +161,33 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         bytes32 gasLane, // keyHash
         uint32 callbackGasLimit,
         address hub,
-        address moduleGlobals
+        address moduleGlobals,
+        address poolAddressesProvider
     ) VRFConsumerBaseV2(vrfCoordinatorV2) FeeModuleBase(moduleGlobals) ModuleBase(hub) {
         i_priceFeed = AggregatorV3Interface(priceFeed);
         i_flowmiOwner = payable(msg.sender);
-        prize = i_goal * i_flowmiCost;
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
         s_raffleState = RaffleState.OPEN;
         i_subscriptionId = subscriptionId;
         i_gasLane = gasLane;
         i_callbackGasLimit = callbackGasLimit;
         s_indexOfWinner = 0;
+
+        //Pool
+        i_poolAddressesProvider = IPoolAddressesProvider(poolAddressesProvider);
+        POOL = IPool(i_poolAddressesProvider.getPool());
+        // Token Interfaces
+        imatic = IERC20(maticTokenAddress);
+        iWmatic = IERC20(wmaticTokenAddress);
+        iaWmatic = IERC20(awmaticTokenAddress);
+        fraction = (i_flowmiCost * poolFraction) / 100;
+        _withdrawAmmount = fraction * (i_goal - 1);
+        prize = i_goal * fraction;
+
+        indeposit = 0;
+        inwithdraw = 0;
+        // IWETHGateway
+        iWETHGateway = IWETHGateway(WETHGatewayAddress);
     }
 
     //--------------------------Lens Module and Flowmi Logic-----------------------------------//
@@ -177,10 +242,10 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
 
         profileid = payable(recipient);
 
-        // Check if profile to flowmiFollow is registered
+        /* Check if profile to flowmiFollow is registered
         if (!s_profileIsFlowmi[profileid]) {
             revert Flowmi__MustBeRegisteredFlowmi();
-        }
+        }*/
         // Check that you are not following yourself
         if (follower == profileid) {
             revert Flowmi__CantFlowmiFollowYourself();
@@ -200,11 +265,12 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         // Updates amount of flowmiFollowers
         s_profileToFollowersCount[profileid] = s_index;
 
-        // If in goal, select a winner and call payment
+        // Deposit the fee
+        iWETHGateway.depositETH{value: fraction}(address(POOL), address(this), 0);
 
         if (s_index % i_goal == 0 && s_profileToFollowersCount[profileid] != 0) {
             s_profileToRaffles[profileid]++;
-
+            // If the raffle is activated:
             requestRandomWords();
         }
     }
@@ -277,7 +343,7 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
 
         s_recentWinner = (s_profileToFollowers[profileid][s_indexOfWinner]);
         s_profileToWins[s_recentWinner]++;
-        pay(s_recentWinner);
+        payAtokens(s_recentWinner);
     }
 
     // Internal VRF function
@@ -293,9 +359,15 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
 
     /** @notice This function transfers, just to make it more difficult to hack
      *  @param _winner is the address given by the mapping of followers in the index given by the VRF
-     */
+     *
     function pay(address _winner) private {
         (bool success, ) = _winner.call{value: prize}('');
+        if (!success) {
+            revert Flowmi__TransferFailed();
+        }
+    }*/
+    function payAtokens(address _winner) private {
+        bool success = iaWmatic.transfer(_winner, prize);
         if (!success) {
             revert Flowmi__TransferFailed();
         }
@@ -322,8 +394,26 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
 
     /** @notice Let's you know how much is in aave protocol
      */
-    function getPool() public onlyOwner {
-        //mapping de progiles [address] = true;
+    function getPool() public view returns (address) {
+        return address(POOL);
+    }
+
+    /** @notice AAVE pool data
+     */
+
+    function getUserAccountData(address _userAddress)
+        external
+        view
+        returns (
+            uint256 totalCollateralBase,
+            uint256 totalDebtBase,
+            uint256 availableBorrowsBase,
+            uint256 currentLiquidationThreshold,
+            uint256 ltv,
+            uint256 healthFactor
+        )
+    {
+        return POOL.getUserAccountData(_userAddress);
     }
 
     /** @notice Retrieve the goal of followers when the raffle is activated

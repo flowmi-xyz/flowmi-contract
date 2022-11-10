@@ -34,6 +34,8 @@
   },
   "homepage": "https://github.com/aave/lens-protocol#readme",
   "devDependencies": {
+    "@aave/core-v3": "^1.16.2",
+    "@aave/periphery-v3": "^1.19.2",
     "@chainlink/contracts": "0.4.1",
     "@nomicfoundation/hardhat-toolbox": "^2.0.0",
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers",
