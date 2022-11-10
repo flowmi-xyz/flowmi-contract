@@ -84,6 +84,11 @@ yarn hardhat deploy
 yarn hardhat test
 ```
 
+### AAVE testing
+```
+yarn hardhat run scripts/aaveFlowmiFollow.js
+```
+
 ### Test Coverage
 
 ```
