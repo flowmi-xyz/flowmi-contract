@@ -12,6 +12,11 @@ the followers gets the prize!🏅🏅🏅
 
 But not only that! while the fees are in the contract, we earn interest by depositing the tokens in a liquidity pool provided by the 👻 [Aave](https://aave.com/) protocol and if you win the Flowmi Raffle, you get a prize in [Aave Wraped Matic Token](https://mumbai.polygonscan.com/token/0x89a6ae840b3f8f489418933a220315eea36d11ff?a=0xe19c50623289a8eb24b6d9d99f9baf6c087ae287), which you can redeem for Matics anytime you want! it will earn intereset while you don't redeem it!! 😎.
 
+Add this address to your wallet to see your aWMatics! 
+```
+0x89a6AE840b3F8f489418933A220315eeA36d11fF
+```
+
 To be able to perform this task, Flowmi uses two Chainlink technologies, the 🐸["Datafeed"](https://chain.link/data-feeds) to calculate how many Matics is the $1 dolar fee by the time you use the FlowmiModule, and the 🐸["VRF"](https://blog.chain.link/verifiable-random-function-vrf/) to calculate verifiable random numbers for the raffle. 
 
 Have fun!🥳
@@ -69,7 +74,7 @@ yarn
 Dependencies:
 
 ```
-yarn add --dev @nomiclabs/hardhat-ethers@npm:hardhat-deploy-ethers ethers @nomiclabs/hardhat-etherscan @nomiclabs/hardhat-waffle chai ethereum-waffle hardhat hardhat-contract-sizer hardhat-deploy hardhat-deploy-ethers hardhat-gas-reporter prettier prettier-plugin-solidity solhint solidity-coverage dotenv @nomicfoundation/hardhat-toolbox @chainlink/contracts@0.4.1
+yarn add --dev @nomiclabs/hardhat-ethers@npm:hardhat-deploy-ethers ethers @nomiclabs/hardhat-etherscan @nomiclabs/hardhat-waffle chai ethereum-waffle hardhat hardhat-contract-sizer hardhat-deploy hardhat-deploy-ethers hardhat-gas-reporter prettier prettier-plugin-solidity solhint solidity-coverage dotenv @nomicfoundation/hardhat-toolbox @chainlink/contracts@0.4.1 @aave/core-v3 @aave/periphery-v3
 ```
 
 Deploy:
@@ -80,11 +85,29 @@ yarn hardhat deploy
 
 ## Testing
 
-```
-yarn hardhat test
-```
+If you want to test the module, you can follow the [lens-protocol guide](https://docs.lens.xyz/docs/testing-a-module)
 
 ### AAVE testing
+
+The script aaveFlowmiFollow.js is performed in a local forked polygon mainnet.
+It tests the 2 ways to deposit and withdraw tokens from a Matic Aave Liquidity Pool.
+These 2 ways are:
+  1. Wrapping, deposit, withdraw, unwrap.
+  2. deposit through Gateway, withdraw through Gateway.
+  
+In the second option it's not necesary to wrap and unwrap cause the WETHGateway takes care of that.
+So the steps tested are:
+
+1. Deposit 1 Matic in the Gateway: It's supposed to wrap and deposit matics for you.
+It actually only wraps in this setup.
+2. Wrap: deposit another Matic in the WMatic contract to swap Matics for WMatics
+3. Deposit in the pool: You deposit both the gateway and the wrapped token to the
+aave liquidity pool. You get aTokens in return. 
+4. Withdraw from the pool: You should get 1 WMatic.
+5. Unwrap tokens withdrawn: You should have now 0 WMatics.
+6. Withdraw through the Gateway: It should withdraw the last WMatic and unwrap it
+It doesn't work by the date this code was written (nov-10-2022)
+
 ```
 yarn hardhat run scripts/aaveFlowmiFollow.js
 ```
@@ -101,7 +124,7 @@ yarn hardhat coverage
 
 1. Setup environment variabltes
 
-You'll want to set your `MAINNET_RPC_URL`, the url and api key can be provided by [Quicknode](https://www.quicknode.com/endpoints). Also `PRIVATE_KEY` as environment variables. You can add them to a `.env` file.
+You'll want to set for testing in a local fokr your `MAINNET_RPC_URL`, the url and api key can be provided by [Quicknode](https://www.quicknode.com/endpoints). Also your `MUMBAI_RPC_URL` for deploying in testnet and a `PRIVATE_KEY` as environment variables. You can add them to a `.env` file.
 
 - `PRIVATE_KEY`: The private key of your account (like from [metamask](https://metamask.io/)). **NOTE:** FOR DEVELOPMENT, PLEASE USE A KEY THAT DOESN'T HAVE ANY REAL FUNDS ASSOCIATED WITH IT.
   - You can [learn how to export it here](https://metamask.zendesk.com/hc/en-us/articles/360015289632-How-to-Export-an-Account-Private-Key).
