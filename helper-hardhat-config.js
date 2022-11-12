@@ -25,9 +25,9 @@ const networkConfig = {
     moduleGlobals: '0xcbCC5b9611d22d11403373432642Df9Ef7Dd81AD', // sandbox
     //'0x1353aAdfE5FeD85382826757A95DE908bd21C4f9';//mumbai
     aavePoolAdressesProvider: '0x5343b5bA672Ae99d627A1C87866b8E53F47Db2E6', // polygon testnet pool
-    maticAddress: '0xd65d229951e94a7138f47bd9e0faff42a7ace0c6',
+    wmaticAddress: '0xb685400156cF3CBE8725958DeAA61436727A30c3',
     awmaticAddress: '0x89a6AE840b3F8f489418933A220315eeA36d11fF',
-    wGatewayAddress: '0x2a58E9bbb5434FdA7FF78051a4B82cb0EF669C17',
+    //wGatewayAddress: '0x2a58E9bbb5434FdA7FF78051a4B82cb0EF669C17',
   },
   137: {
     name: 'polygon',

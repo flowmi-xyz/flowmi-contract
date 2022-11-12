@@ -104,7 +104,7 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
     uint256 private inwithdraw;
 
     // Direcciones de matic
-    address private immutable i_wmaticTokenAddress = 0xb685400156cF3CBE8725958DeAA61436727A30c3;
+    address private immutable i_wmaticTokenAddress;
     address private immutable i_awmaticTokenAddress;
 
     IERC20 public iaWmatic;
@@ -139,6 +139,8 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
     mapping(address => uint256) private s_profileToWins; // mapping to know how many times an account has won a raffle
     mapping(address => uint256) private s_profileToRaffles; // mapping to know how many times an account has activated a raffle
 
+    mapping(address => uint256) private s_profileToThisRaffleFunds; // mapping to know how many tokens are in the current raffle
+
     // Lens
     using SafeERC20 for IERC20;
     mapping(uint256 => ProfileData) internal _dataByProfile;
@@ -149,15 +151,20 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         address priceFeed,
         address vrfCoordinatorV2,
         uint64 subscriptionId,
-        bytes32 gasLane, // keyHash
+        bytes32 gasLane,
         uint32 callbackGasLimit,
         address hub,
         address moduleGlobals,
         address poolAddressesProvider,
-        address maticTokenAddress,
-        address awmaticTokenAddress,
-        address WETHGatewayAddress
-    ) VRFConsumerBaseV2(vrfCoordinatorV2) FeeModuleBase(moduleGlobals) ModuleBase(hub) {
+        address wmaticTokenAddress,
+        address awmaticTokenAddress
+    )
+        // address WETHGatewayAddress
+
+        VRFConsumerBaseV2(vrfCoordinatorV2)
+        FeeModuleBase(moduleGlobals)
+        ModuleBase(hub)
+    {
         i_priceFeed = AggregatorV3Interface(priceFeed);
         i_flowmiOwner = payable(msg.sender);
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2);
@@ -172,6 +179,7 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         POOL = IPool(i_poolAddressesProvider.getPool());
 
         // Token Interfaces
+        i_wmaticTokenAddress = wmaticTokenAddress;
         i_awmaticTokenAddress = awmaticTokenAddress;
         iaWmatic = IERC20(i_awmaticTokenAddress);
         iWmatic = IERC20(i_wmaticTokenAddress);
@@ -229,18 +237,13 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         uint256 profileId,
         bytes calldata data
     ) external override onlyHub {
-        uint256 amount = _dataByProfile[profileId].amount;
-        //  unit256 amount_paid =
-        //address currency = _dataByProfile[profileId].currency;
         // _validateDataIsExpected(data, currency, amount);
         (uint256 amount_paid, address currency) = abi.decode(data, (uint256, address));
-
-        //address recipient = _dataByProfile[profileId].recipient;
 
         profileid = payable(_dataByProfile[profileId].recipient);
 
         // Check the entrance fee is correct with Pricefeed for USD/Matic
-        if (amount_paid.getConversionRate(i_priceFeed) < i_flowmiCost) {
+        if (amount_paid < i_flowmiCost) {
             revert Flowmi__SendMoreToEnterFlowmi();
         }
         // Check that you are not following yourself
@@ -250,21 +253,25 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         // Reads previous amount of flowmiFollower
         s_index = s_profileToFollowersCount[profileid];
         // Update total amount of funds for profile
-        s_profileToFunds[profileid] += 1;
+        uint256 requested = i_flowmiCost.getConversionRate(i_priceFeed);
+        s_profileToFunds[profileid] += requested;
+        // Update total amount of funds for profile
+        s_profileToThisRaffleFunds[profileid] += requested;
         // Stores address as follower of profile
         s_profileToFollowers[profileid][s_index] = payable(follower);
         s_index++;
         // Updates amount of flowmiFollowers
         s_profileToFollowersCount[profileid] = s_index;
-        iWmatic.safeTransferFrom(follower, address(this), fraction);
+        // iWmatic.safeTransferFrom(follower, address(this), fraction);
+        iWmatic.safeTransferFrom(follower, address(this), requested);
 
         // Deposit the fee
+        //uint256 toPool = 10 * fraction * requested;
         // iWETHGateway.depositETH{value: fraction}(address(POOL), address(this), 0);
         // Approve & supply
-        //iWmatic.approve(address(this), fraction);
-        iWmatic.approve(address(POOL), fraction);
+        iWmatic.approve(address(POOL), requested);
 
-        POOL.supply(i_wmaticTokenAddress, fraction, address(this), 0);
+        POOL.supply(i_wmaticTokenAddress, requested, address(this), 0);
 
         if (s_index % i_goal == 0 && s_profileToFollowersCount[profileid] != 0) {
             s_profileToRaffles[profileid]++;
@@ -367,10 +374,11 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
     }
 
     function payAtokens(address _winner) private {
-        bool success = iaWmatic.transfer(_winner, prize);
+        bool success = iaWmatic.transfer(_winner, s_profileToThisRaffleFunds[profileid]);
         if (!success) {
             revert Flowmi__TransferFailed();
         }
+        s_profileToThisRaffleFunds[profileid] = 0;
     }
 
     /** @notice This function registers a profile
@@ -465,13 +473,21 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         return s_profileToFollowers[_profileid][_index];
     }
 
-    /** @notice Gets funds a profile has to give in the next raffle
+    /** @notice Gets number of followers in the current raffle
      * @param _profileid is the profile requested
-     * @return s_profileToFunds[_profileid] % i_goal, total amount of funds related to the profile
-     * "modulo" the goal of the raffle, so it only counts what haven't been raffled yet
+     * @return s_profileToFollowersCount[_profileid] % i_goal, total amount of followers related to the profile
+     * "modulo" the goal of the raffle, so it only counts whats haven't been raffled yet
      */
-    function getFundsToRaffle(address _profileid) public view returns (uint256) {
-        return s_profileToFunds[_profileid] % i_goal;
+    function getFollowsToRaffle(address _profileid) public view returns (uint256) {
+        return s_profileToFollowersCount[_profileid] % i_goal;
+    }
+
+    /** @notice Gets funds in the current raffle
+     * @param _profileid is the profile requested
+     * @return s_profileToThisRaffleFunds[_profileid], amount gathered for this raffle
+     */
+    function getFundsInThisRaffle(address _profileid) public view returns (uint256) {
+        return s_profileToThisRaffleFunds[_profileid];
     }
 
     /** @notice Gets total funds a profile has been given
@@ -533,8 +549,8 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
     function withdraw() public onlyOwner {
         (bool success, ) = i_flowmiOwner.call{value: address(this).balance}('');
         require(success);
-
-        bool successs = iWmatic.transfer(address(this), address(this).balance);
+        (uint256 totalCollateralBase, , , , , ) = POOL.getUserAccountData(address(this));
+        bool successs = iaWmatic.transfer(i_flowmiOwner, totalCollateralBase);
         if (!successs) {
             revert Flowmi__TransferFailed();
         }

@@ -24,9 +24,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     maticUsdPriceFeedAddress,
     hub,
     moduleGlobals,
-    maticAddress,
-    awmaticAddress,
-    wGatewayAddress;
+    wmaticAddress,
+    awmaticAddress;
+  //wGatewayAddress;
 
   if (chainId == 31337) {
     // create VRFV2 Subscription
@@ -48,9 +48,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     maticUsdPriceFeedAddress = networkConfig[chainId]['maticUsdPriceFeed'];
     hub = networkConfig[chainId]['hub'];
     moduleGlobals = networkConfig[chainId]['moduleGlobals'];
-    maticAddress = networkConfig[chainId]['maticAddress'];
+    wmaticAddress = networkConfig[chainId]['wmaticAddress'];
     awmaticAddress = networkConfig[chainId]['awmaticAddress'];
-    wGatewayAddress = networkConfig[chainId]['wGatewayAddress'];
+    // wGatewayAddress = networkConfig[chainId]['wGatewayAddress'];
     aavePoolAdressesProvider = networkConfig[chainId]['aavePoolAdressesProvider'];
   }
   const waitBlockConfirmations = developmentChains.includes(network.name)
@@ -68,9 +68,9 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     hub,
     moduleGlobals,
     aavePoolAdressesProvider,
-    maticAddress,
+    wmaticAddress,
     awmaticAddress,
-    wGatewayAddress,
+    // wGatewayAddress,
   ];
   const flowMi = await deploy('FlowmiFollowModule', {
     from: deployer,
