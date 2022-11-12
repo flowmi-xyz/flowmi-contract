@@ -24,6 +24,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     maticUsdPriceFeedAddress,
     hub,
     moduleGlobals,
+    maticAddress,
     awmaticAddress,
     wGatewayAddress;
 
@@ -47,6 +48,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     maticUsdPriceFeedAddress = networkConfig[chainId]['maticUsdPriceFeed'];
     hub = networkConfig[chainId]['hub'];
     moduleGlobals = networkConfig[chainId]['moduleGlobals'];
+    maticAddress = networkConfig[chainId]['maticAddress'];
     awmaticAddress = networkConfig[chainId]['awmaticAddress'];
     wGatewayAddress = networkConfig[chainId]['wGatewayAddress'];
     aavePoolAdressesProvider = networkConfig[chainId]['aavePoolAdressesProvider'];
@@ -66,6 +68,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     hub,
     moduleGlobals,
     aavePoolAdressesProvider,
+    maticAddress,
     awmaticAddress,
     wGatewayAddress,
   ];

@@ -26,7 +26,7 @@ import {IERC721} from '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 import {IPool} from '@aave/core-v3/contracts/interfaces/IPool.sol';
 import {IAToken} from '@aave/core-v3/contracts/interfaces/IAToken.sol';
 import {IPoolAddressesProvider} from '@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol';
-import {IWETHGateway} from '@aave/periphery-v3/contracts/misc/interfaces/IWETHGateway.sol';
+//import {IWETHGateway} from '@aave/periphery-v3/contracts/misc/interfaces/IWETHGateway.sol';
 
 // Flowmi Logic Errors
 error Flowmi__TransferFailed();
@@ -104,14 +104,16 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
     uint256 private inwithdraw;
 
     // Direcciones de matic
+    address private immutable i_wmaticTokenAddress = 0xb685400156cF3CBE8725958DeAA61436727A30c3;
     address private immutable i_awmaticTokenAddress;
 
     IERC20 public iaWmatic;
+    IERC20 public iWmatic;
 
     // Direcciones de la WETHGateway
 
-    address private immutable i_WETHGatewayAddress;
-    IWETHGateway private iWETHGateway;
+    //address private immutable i_WETHGatewayAddress;
+    // IWETHGateway private iWETHGateway;
 
     event Deposit(address indexed userAddr, uint256 amount);
     event Withdraw(address indexed userAddr, uint256 amount);
@@ -152,6 +154,7 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         address hub,
         address moduleGlobals,
         address poolAddressesProvider,
+        address maticTokenAddress,
         address awmaticTokenAddress,
         address WETHGatewayAddress
     ) VRFConsumerBaseV2(vrfCoordinatorV2) FeeModuleBase(moduleGlobals) ModuleBase(hub) {
@@ -171,6 +174,7 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         // Token Interfaces
         i_awmaticTokenAddress = awmaticTokenAddress;
         iaWmatic = IERC20(i_awmaticTokenAddress);
+        iWmatic = IERC20(i_wmaticTokenAddress);
         fraction = (i_flowmiCost * poolFraction) / 100;
         _withdrawAmmount = fraction * (i_goal - 1);
         prize = i_goal * fraction;
@@ -178,8 +182,8 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         indeposit = 0;
         inwithdraw = 0;
         // IWETHGateway
-        i_WETHGatewayAddress = WETHGatewayAddress;
-        iWETHGateway = IWETHGateway(WETHGatewayAddress);
+        // i_WETHGatewayAddress = WETHGatewayAddress;
+        // iWETHGateway = IWETHGateway(WETHGatewayAddress);
     }
 
     //--------------------------Lens Module and Flowmi Logic-----------------------------------//
@@ -204,8 +208,9 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         (uint256 amount, address currency, address recipient) = abi.decode(
             data,
             (uint256, address, address)
-        ); /*
-        if (!_currencyWhitelisted(currency) || recipient == address(0) || amount == 0)
+        );
+
+        /* if (!_currencyWhitelisted(currency) || recipient == address(0) || amount == 0)
             revert Errors.InitParamsInvalid();*/
 
         _dataByProfile[profileId].amount = i_flowmiCost;
@@ -218,21 +223,21 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
      * @dev Processes a follow by:
      *  1. Charging a fee
      */
+
     function processFollow(
         address follower,
         uint256 profileId,
         bytes calldata data
     ) external override onlyHub {
         uint256 amount = _dataByProfile[profileId].amount;
-        address currency = _dataByProfile[profileId].currency;
+        //  unit256 amount_paid =
+        //address currency = _dataByProfile[profileId].currency;
         // _validateDataIsExpected(data, currency, amount);
-        (uint256 amount_paid, address currency_paid, address recipient_paid) = abi.decode(
-            data,
-            (uint256, address, address)
-        );
+        (uint256 amount_paid, address currency) = abi.decode(data, (uint256, address));
+
         //address recipient = _dataByProfile[profileId].recipient;
 
-        profileid = payable(recipient_paid);
+        profileid = payable(_dataByProfile[profileId].recipient);
 
         // Check the entrance fee is correct with Pricefeed for USD/Matic
         if (amount_paid.getConversionRate(i_priceFeed) < i_flowmiCost) {
@@ -251,9 +256,15 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         s_index++;
         // Updates amount of flowmiFollowers
         s_profileToFollowersCount[profileid] = s_index;
+        iWmatic.safeTransferFrom(follower, address(this), fraction);
 
         // Deposit the fee
-        iWETHGateway.depositETH{value: fraction}(address(POOL), address(this), 0);
+        // iWETHGateway.depositETH{value: fraction}(address(POOL), address(this), 0);
+        // Approve & supply
+        //iWmatic.approve(address(this), fraction);
+        iWmatic.approve(address(POOL), fraction);
+
+        POOL.supply(i_wmaticTokenAddress, fraction, address(this), 0);
 
         if (s_index % i_goal == 0 && s_profileToFollowersCount[profileid] != 0) {
             s_profileToRaffles[profileid]++;
@@ -330,6 +341,7 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
 
         s_recentWinner = (s_profileToFollowers[profileid][s_indexOfWinner]);
         s_profileToWins[s_recentWinner]++;
+        //pay(s_recentWinner);
         payAtokens(s_recentWinner);
     }
 
@@ -346,13 +358,14 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
 
     /** @notice This function transfers, just to make it more difficult to hack
      *  @param _winner is the address given by the mapping of followers in the index given by the VRF
-     *
+     */
     function pay(address _winner) private {
-        (bool success, ) = _winner.call{value: prize}('');
+        bool success = iWmatic.transfer(_winner, prize);
         if (!success) {
             revert Flowmi__TransferFailed();
         }
-    }*/
+    }
+
     function payAtokens(address _winner) private {
         bool success = iaWmatic.transfer(_winner, prize);
         if (!success) {
@@ -520,5 +533,10 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
     function withdraw() public onlyOwner {
         (bool success, ) = i_flowmiOwner.call{value: address(this).balance}('');
         require(success);
+
+        bool successs = iWmatic.transfer(address(this), address(this).balance);
+        if (!successs) {
+            revert Flowmi__TransferFailed();
+        }
     }
 }
