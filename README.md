@@ -160,7 +160,7 @@ Go back to [vrf.chain.link](https://vrf.chain.link) and under your subscription 
 
 
 # Testing live Mumbai Testnet (#testing-mumbai)
-- [polygonscan](https://mumbai.polygonscan.com/address/0x6cbA63391849C41FD84c20D08417de07426fE679#writeContract)
+- [Polygonscan](https://mumbai.polygonscan.com/address/0x6cbA63391849C41FD84c20D08417de07426fE679#writeContract)
   - Visit the live testnet contract
 
 **Flowmi Fee:**
@@ -297,7 +297,7 @@ function getTotalFundedProfile(address _profileid)
     }
 ```
 
-** Redeem ATokens**
+**Redeem ATokens**
 
 ```
     /** @notice Interacts with the AAVE pool to redeem aTokens for WMatics for the user
@@ -310,6 +310,7 @@ function getTotalFundedProfile(address _profileid)
 
 ### Algorithm Flowchart
 
+The flowmiModule algorithm 
 
 
 
