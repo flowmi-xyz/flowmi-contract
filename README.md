@@ -299,10 +299,11 @@ function getTotalFundedProfile(address _profileid)
 
 **Redeem ATokens**
 
-```
+
     /** @notice Interacts with the AAVE pool to redeem aTokens for WMatics for the user
      * @param _amount is the amount of aTokens to redeem
      */
+```
   function redeemAToken(uint256 _amount) public {
  
     }
