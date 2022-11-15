@@ -278,7 +278,7 @@ function getTotalFundedProfile(address _profileid)
      * @param _profileid is the profile requested
      * @return s_recentWinner address of the last winner
      */
-     ```
+```
     function getLastWinnerAddress(address _profileid) public view returns (address) {
         return s_profileToLastWinnerAddress[_profileid];
     }
@@ -286,11 +286,12 @@ function getTotalFundedProfile(address _profileid)
 
 **The prize in WMatics of the last winner given a profieid**
 
-```
+
     /** @notice Gets the latest winner prize given a profileid address
      * @param _profileid is the profile requested
      * @return s_recentWinner address of the last winner
      */
+```
     function getLastWinnerPrize(address _profileid) public view returns (uint256) {
         return s_profileToLastWinnerPrize[_profileid];
     }
@@ -303,9 +304,13 @@ function getTotalFundedProfile(address _profileid)
      * @param _amount is the amount of aTokens to redeem
      */
   function redeemAToken(uint256 _amount) public {
-  ...
+ 
     }
 ```
+
+### Algorithm Flowchart
+
+
 
 
 ### Estimate gas cost in USD
