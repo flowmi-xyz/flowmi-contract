@@ -311,10 +311,10 @@ function getTotalFundedProfile(address _profileid)
 
 ### Algorithm Flowchart
 
-The flowmiModule algorithm [!flowmidiagram](flowmi_dapp.png)
- [!flowmi_ini](flowmi_initialize.png)
- [!flowmi_foll](flowmi_follow.png)
- [!flowmi_red](flowmi_redeem.png)
+The flowmiModule algorithm ![flowmidiagram](flowmi_dapp.png)
+ ![flowmi_ini](flowmi_initialize.png)
+ ![flowmi_foll](flowmi_follow.png)
+ ![flowmi_red](flowmi_redeem.png)
 
 
 
