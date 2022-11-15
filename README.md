@@ -309,12 +309,23 @@ function getTotalFundedProfile(address _profileid)
     }
 ```
 
-### Algorithm Flowchart
+### Diagrams
 
-The flowmiModule algorithm ![flowmidiagram](flowmi_dapp.png)
- ![flowmi_ini](flowmi_initialize.png)
- ![flowmi_foll](flowmi_follow.png)
- ![flowmi_red](flowmi_redeem.png)
+# Ecosystem
+
+![dapp_env](flowmi_dapp.png)
+
+# Follow
+
+![follow](flowmi_follow.png)
+
+# Initialize 
+
+![Initilize](initialize.png)
+ 
+# Redeem AToken
+
+![reddemATokens](redeemAToken.png)
 
 
 
