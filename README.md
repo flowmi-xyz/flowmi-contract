@@ -27,7 +27,7 @@ Have fun!🥳
   - [Typescript](#typescript)
 - [Usage](#usage)
   - [Testing](#testing)
-  - [Functios](#functions)
+  - [Functions](#functions)
   - [Diagrams](#diagrams)
 - [Deployment to a testnet or mainnet](#deployment-to-a-testnet-or-mainnet)
     - [Estimate gas cost in USD](#estimate-gas-cost-in-usd)
@@ -277,9 +277,9 @@ function getTotalFundedProfile(address _profileid)
 
 ![follow](flowmi_follow.png)
 
-**- Initialize **
+**- Initialize**
 
-![Initilize](Initialize.png)
+![Initialize](Initialize.png)
  
 **- Redeem AToken**
 
