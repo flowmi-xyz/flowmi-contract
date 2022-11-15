@@ -27,7 +27,8 @@ Have fun!🥳
   - [Typescript](#typescript)
 - [Usage](#usage)
   - [Testing](#testing)
-    - [Test Coverage](#test-coverage)
+  - [Functios](#functions)
+  - [Diagrams](#diagrams)
 - [Deployment to a testnet or mainnet](#deployment-to-a-testnet-or-mainnet)
     - [Estimate gas cost in USD](#estimate-gas-cost-in-usd)
   - [Verify on etherscan](#verify-on-etherscan)
@@ -118,50 +119,7 @@ yarn hardhat run scripts/aaveFlowmiFollow.js
 yarn hardhat coverage
 ```
 
-
-
-# Deployment to a testnet or mainnet
-
-1. Setup environment variabltes
-
-You'll want to set for testing in a local fokr your `MAINNET_RPC_URL`, the url and api key can be provided by [Quicknode](https://www.quicknode.com/endpoints). Also your `MUMBAI_RPC_URL` for deploying in testnet and a `PRIVATE_KEY` as environment variables. You can add them to a `.env` file.
-
-- `PRIVATE_KEY`: The private key of your account (like from [metamask](https://metamask.io/)). **NOTE:** FOR DEVELOPMENT, PLEASE USE A KEY THAT DOESN'T HAVE ANY REAL FUNDS ASSOCIATED WITH IT.
-  - You can [learn how to export it here](https://metamask.zendesk.com/hc/en-us/articles/360015289632-How-to-Export-an-Account-Private-Key).
-- `MUMBAI_RPC_URL`: This is url of the mumbai testnet node you're working with. 
-
-2. Get testnet ETH and MATIC
-
-Head over to [faucets.chain.link](https://faucets.chain.link/) and get some tesnet ETH & LINK, also to (https://mumbaifaucet.com/) and get testnet MATIC. You should see the ETH and LINK show up in your metamask. [You can read more on setting up your wallet with LINK.](https://docs.chain.link/docs/deploy-your-first-contract/#install-and-fund-your-metamask-wallet)
-
-3. Setup a Chainlink VRF Subscription ID
-
-Head over to [vrf.chain.link](https://vrf.chain.link/) and setup a new subscription, and get a subscriptionId. You can reuse an old subscription if you already have one. 
-
-[You can follow the instructions](https://docs.chain.link/docs/get-a-random-number/) if you get lost. You should leave this step with:
-
-1. A subscription ID
-2. Your subscription should be funded with LINK
-
-3. Deploy
-
-In your `helper-hardhat-config.js` add your `subscriptionId` under the section of the chainId you're using (aka, if you're deploying to goerli, add your `subscriptionId` in the `subscriptionId` field under the `4` section.)
-
-Then run:
-```
-yarn hardhat deploy --network mumbai
-```
-
-And copy / remember the contract address. 
-
-4. Add your contract address as a Chainlink VRF Consumer
-
-Go back to [vrf.chain.link](https://vrf.chain.link) and under your subscription add `Add consumer` and add your contract address. You should also fund the contract with a minimum of 1 LINK. 
-
-
-# Testing live Mumbai Testnet (#testing-mumbai)
-- [Polygonscan](https://mumbai.polygonscan.com/address/0x6cbA63391849C41FD84c20D08417de07426fE679#writeContract)
-  - Visit the live testnet contract
+## Functions
 
 **Flowmi Fee:**
 
@@ -309,23 +267,69 @@ function getTotalFundedProfile(address _profileid)
     }
 ```
 
-### Diagrams
+## Diagrams
 
-# Ecosystem
+**- Ecosystem**
 
 ![dapp_env](flowmi_dapp.png)
 
-# Follow
+**- Follow**
 
 ![follow](flowmi_follow.png)
 
-# Initialize 
+**- Initialize **
 
-![Initilize](initialize.png)
+![Initilize](Initialize.png)
  
-# Redeem AToken
+**- Redeem AToken**
 
 ![reddemATokens](redeemAToken.png)
+
+
+# Deployment to a testnet or mainnet
+
+1. Setup environment variabltes
+
+You'll want to set for testing in a local fokr your `MAINNET_RPC_URL`, the url and api key can be provided by [Quicknode](https://www.quicknode.com/endpoints). Also your `MUMBAI_RPC_URL` for deploying in testnet and a `PRIVATE_KEY` as environment variables. You can add them to a `.env` file.
+
+- `PRIVATE_KEY`: The private key of your account (like from [metamask](https://metamask.io/)). **NOTE:** FOR DEVELOPMENT, PLEASE USE A KEY THAT DOESN'T HAVE ANY REAL FUNDS ASSOCIATED WITH IT.
+  - You can [learn how to export it here](https://metamask.zendesk.com/hc/en-us/articles/360015289632-How-to-Export-an-Account-Private-Key).
+- `MUMBAI_RPC_URL`: This is url of the mumbai testnet node you're working with. 
+
+2. Get testnet ETH and MATIC
+
+Head over to [faucets.chain.link](https://faucets.chain.link/) and get some tesnet ETH & LINK, also to (https://mumbaifaucet.com/) and get testnet MATIC. You should see the ETH and LINK show up in your metamask. [You can read more on setting up your wallet with LINK.](https://docs.chain.link/docs/deploy-your-first-contract/#install-and-fund-your-metamask-wallet)
+
+3. Setup a Chainlink VRF Subscription ID
+
+Head over to [vrf.chain.link](https://vrf.chain.link/) and setup a new subscription, and get a subscriptionId. You can reuse an old subscription if you already have one. 
+
+[You can follow the instructions](https://docs.chain.link/docs/get-a-random-number/) if you get lost. You should leave this step with:
+
+1. A subscription ID
+2. Your subscription should be funded with LINK
+
+3. Deploy
+
+In your `helper-hardhat-config.js` add your `subscriptionId` under the section of the chainId you're using (aka, if you're deploying to goerli, add your `subscriptionId` in the `subscriptionId` field under the `4` section.)
+
+Then run:
+```
+yarn hardhat deploy --network mumbai
+```
+
+And copy / remember the contract address. 
+
+4. Add your contract address as a Chainlink VRF Consumer
+
+Go back to [vrf.chain.link](https://vrf.chain.link) and under your subscription add `Add consumer` and add your contract address. You should also fund the contract with a minimum of 1 LINK. 
+
+
+# Testing live Mumbai Testnet (#testing-mumbai)
+- [Polygonscan](https://mumbai.polygonscan.com/address/0x6cbA63391849C41FD84c20D08417de07426fE679#writeContract)
+  - Visit the live testnet contract
+
+
 
 
 
