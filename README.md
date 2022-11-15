@@ -7,10 +7,10 @@ Flowmi is a 🌿[Lens-protocol](https://docs.lens.xyz/docs/what-is-lens) follow 
 
 What is special about Flowmi is that by following a profile with the FlowmiModule, you enter a raffle asociated to that profile! 🎲
 
-Flowmi will ask you for a $1 dolar contribution to the pool, and when 10 followers are gathered the raffle is activated and one of
+Flowmi will ask you for a $1 dolar contribution to the pool, and when a number of followers are gathered the raffle is activated and one of
 the followers gets the prize!🏅🏅🏅
 
-But not only that! while the fees are in the contract, we earn interest by depositing the tokens in a liquidity pool provided by the 👻 [Aave](https://aave.com/) protocol and if you win the Flowmi Raffle, you get a prize in [Aave Wraped Matic Token](https://mumbai.polygonscan.com/token/0x89a6ae840b3f8f489418933a220315eea36d11ff?a=0xe19c50623289a8eb24b6d9d99f9baf6c087ae287), which you can redeem for Matics anytime you want! it will earn intereset while you don't redeem it!! 😎.
+But not only that! while the fees are in the contract, they earn interest by depositing the tokens in a liquidity pool provided by the 👻 [Aave](https://aave.com/) protocol, and if you win the Flowmi Raffle, you get a prize in [Aave Wraped Matic Token](https://mumbai.polygonscan.com/token/0x89a6ae840b3f8f489418933a220315eea36d11ff?a=0xe19c50623289a8eb24b6d9d99f9baf6c087ae287), which you can redeem for Matics anytime you want! it will earn intereset while you don't redeem it!! 😎.
 
 Add this address to your wallet to see your aWMatics! 
 ```
@@ -272,21 +272,40 @@ function getTotalFundedProfile(address _profileid)
     }
 ```
 
-**Flowmi Follow:** a user calls this function with the address of the profile id to follow. If the goal is reached, a raffle is summoned. 
+**The address of the last winner given a profieid**
 
-    /** @notice Gets the amount that an address has funded
-     * Funds our contract based on the MATIC/USD price
-     * Any account can call this function to flowmi follow a registered flowmi account
-     *  @param _profileid is the address of the registered account
-     *   Iniciates the request for a random word to the VRF
+    /** @notice Gets the latest winner address
+     * @param _profileid is the profile requested
+     * @return s_recentWinner address of the last winner
      */
+     ```
+    function getLastWinnerAddress(address _profileid) public view returns (address) {
+        return s_profileToLastWinnerAddress[_profileid];
+    }
+```
+
+**The prize in WMatics of the last winner given a profieid**
 
 ```
-function flowmiFollow(address _profileid) public payable {
-...
-}
+    /** @notice Gets the latest winner prize given a profileid address
+     * @param _profileid is the profile requested
+     * @return s_recentWinner address of the last winner
+     */
+    function getLastWinnerPrize(address _profileid) public view returns (uint256) {
+        return s_profileToLastWinnerPrize[_profileid];
+    }
 ```
 
+** Redeem ATokens**
+
+```
+    /** @notice Interacts with the AAVE pool to redeem aTokens for WMatics for the user
+     * @param _amount is the amount of aTokens to redeem
+     */
+  function redeemAToken(uint256 _amount) public {
+  ...
+    }
+```
 
 
 ### Estimate gas cost in USD
