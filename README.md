@@ -269,7 +269,7 @@ function getTotalFundedProfile(address _profileid)
 
 ## Diagrams
 
-**- Ecosystem**
+**- Ecosystem Integrations**
 
 ![dapp_env](flowmi_dapp.png)
 
@@ -328,9 +328,6 @@ Go back to [vrf.chain.link](https://vrf.chain.link) and under your subscription 
 # Testing live Mumbai Testnet (#testing-mumbai)
 - [Polygonscan](https://mumbai.polygonscan.com/address/0x6cbA63391849C41FD84c20D08417de07426fE679#writeContract)
   - Visit the live testnet contract
-
-
-
 
 
 ### Estimate gas cost in USD
