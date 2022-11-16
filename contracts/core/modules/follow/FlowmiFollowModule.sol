@@ -135,11 +135,11 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
     mapping(address => mapping(uint256 => address payable)) private s_profileToFollowers; // mapping of profile to index to follower address
     mapping(address => uint256) private s_profileToFollowersCount; // mapping to know the amount of followers an account has
     mapping(address => uint256) private s_profileToFunds; // mapping to know how much funds has an account gathered
-    mapping(address => bool) private s_profileIsFlowmi; // mapping to know if an account is registered as flowmi
     mapping(address => uint256) private s_profileToWins; // mapping to know how many times an account has won a raffle
     mapping(address => uint256) private s_profileToRaffles; // mapping to know how many times an account has activated a raffle
-
     mapping(address => uint256) private s_profileToThisRaffleFunds; // mapping to know how many tokens are in the current raffle
+    mapping(address => uint256) private s_profileToLastWinnerPrize; // mapping of profile to index to follower address
+    mapping(address => address) private s_profileToLastWinnerAddress; // mapping of profile to index to follower address
 
     // Lens
     using SafeERC20 for IERC20;
@@ -350,6 +350,8 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         s_profileToWins[s_recentWinner]++;
         //pay(s_recentWinner);
         payAtokens(s_recentWinner);
+        s_profileToLastWinnerPrize[profileid] = s_profileToThisRaffleFunds[profileid];
+        s_profileToLastWinnerAddress[profileid] = s_recentWinner;
     }
 
     // Internal VRF function
@@ -520,8 +522,12 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
     /** @notice Gets the latest winner address
      * @return s_recentWinner address of the last winner
      */
-    function getLastWinnerAddress() public view returns (address) {
-        return s_recentWinner;
+    function getLastWinnerAddress(address _profileid) public view returns (address) {
+        return s_profileToLastWinnerAddress[_profileid];
+    }
+
+    function getLastWinnerPrize(address _profileid) public view returns (uint256) {
+        return s_profileToLastWinnerPrize[_profileid];
     }
 
     /** @notice Gets the latest winner index
@@ -550,9 +556,24 @@ contract FlowmiFollowModule is VRFConsumerBaseV2, FeeModuleBase, FollowValidator
         (bool success, ) = i_flowmiOwner.call{value: address(this).balance}('');
         require(success);
         (uint256 totalCollateralBase, , , , , ) = POOL.getUserAccountData(address(this));
-        bool successs = iaWmatic.transfer(i_flowmiOwner, totalCollateralBase);
+        bool successs = iaWmatic.transfer(i_flowmiOwner, iaWmatic.balanceOf(i_flowmiOwner));
         if (!successs) {
             revert Flowmi__TransferFailed();
         }
+    }
+
+    function redeem(uint256 _amount) public {
+        //iWmatic.safeTransferFrom(follower, address(this), requested);
+        //  iaWmatic.approve(msg.sender, _amount);
+
+        POOL.withdraw(i_wmaticTokenAddress, _amount, msg.sender);
+    }
+
+    function redeemAToken(uint256 _amount) public {
+        iaWmatic.safeTransferFrom(msg.sender, address(this), _amount);
+
+        POOL.withdraw(i_wmaticTokenAddress, _amount, address(this));
+        iWmatic.approve(msg.sender, _amount);
+        iWmatic.safeTransferFrom(address(this), msg.sender, _amount);
     }
 }
