@@ -271,7 +271,7 @@ function getTotalFundedProfile(address _profileid)
 
 **- Ecosystem Integrations**
 
-![dapp_env](flowmi_dapp.png)
+![dapp_env](flowmi_dapp2.png)
 
 **- Follow**
 
